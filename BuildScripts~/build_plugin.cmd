@@ -1,6 +1,7 @@
 @echo off
 
 set LIBWEBRTC_DOWNLOAD_URL=https://github.com/Unity-Technologies/com.unity.webrtc/releases/download/M83/webrtc-win.zip
+set GLEW_DOWNLOAD_URL=https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0-win32.zip
 set SOLUTION_DIR=%cd%\Plugin~
 
 echo -------------------
@@ -8,6 +9,12 @@ echo Download LibWebRTC
 
 curl -L %LIBWEBRTC_DOWNLOAD_URL% > webrtc.zip
 7z x -aoa webrtc.zip -o%SOLUTION_DIR%\webrtc
+
+echo -------------------
+echo Download GLEW
+
+curl -L %GLEW_DOWNLOAD_URL% > glew.zip
+7z x -aoa glew.zip -o%SOLUTION_DIR%\glew
 
 echo -------------------
 echo Install googletest

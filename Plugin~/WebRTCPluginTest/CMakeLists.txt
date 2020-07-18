@@ -191,4 +191,5 @@ target_include_directories(WebRTCPluginTest
     ${WEBRTC_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
     ${GTEST_INCLUDE_DIRS}
+    ${NVCODEC_INCLUDE_DIR}
 )

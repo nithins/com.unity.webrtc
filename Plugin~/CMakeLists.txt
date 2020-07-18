@@ -9,16 +9,24 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -D_DEBUG")
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads REQUIRED)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH 
+	"${CMAKE_SOURCE_DIR}/cmake" 
+	"${CMAKE_SOURCE_DIR}/NvCodec"
+)
+
+list(APPEND CMAKE_PREFIX_PATH 
+  "glew"
+)
+
 find_package(WebRTC REQUIRED)
-if(MSVC)
-  find_package(CUDA REQUIRED)
-  find_package(Vulkan REQUIRED)
-elseif(APPLE)
+
+if(APPLE)
   find_package(Framework REQUIRED)
-elseif(UNIX)
+else()
   find_package(CUDA REQUIRED)
   find_package(Vulkan REQUIRED)
+  find_package(GLEW REQUIRED)
+  add_subdirectory(NvCodec)
 endif()
 include(AddPlugin)
 

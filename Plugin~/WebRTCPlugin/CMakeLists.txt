@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 
 project(webrtc-plugin)
 
+message(STATUS "NV_ENC_DIR ${NV_ENC_DIR}")
+message(STATUS "NV_DEC_DIR ${NV_DEC_DIR}")
+message(STATUS "NVCODEC_INCLUDE_DIR ${NVCODEC_INCLUDE_DIR}")
+message(STATUS "NVCODEC_LIBRARIES ${NVCODEC_LIBRARIES}")
+
 # Common source files
 file(GLOB sources
   *.cpp
@@ -24,14 +29,18 @@ if(MSVC)
     GraphicsDevice/D3D12/*.cpp
     Codec/SoftwareCodec/*.h
     Codec/SoftwareCodec/*.cpp
-    Codec/NvCodec/NvEncoderD3D11.cpp
-    Codec/NvCodec/NvEncoderD3D11.h
-    Codec/NvCodec/NvEncoderD3D12.cpp
-    Codec/NvCodec/NvEncoderD3D12.h
-    Codec/NvCodec/NvEncoder.cpp
-    Codec/NvCodec/NvEncoder.h
-    Codec/NvCodec/NvEncoderCuda.cpp
-    Codec/NvCodec/NvEncoderCuda.h
+#    Codec/NvCodec/NvEncoderD3D11.cpp
+#    Codec/NvCodec/NvEncoderD3D11.h
+#    Codec/NvCodec/NvEncoderD3D12.cpp
+#    Codec/NvCodec/NvEncoderD3D12.h
+#    Codec/NvCodec/NvEncoder.cpp
+#    Codec/NvCodec/NvEncoder.h
+#    Codec/NvCodec/NvEncoderCuda.cpp
+#    Codec/NvCodec/NvEncoderCuda.h
+    ${NV_ENC_DIR}/*.h
+    ${NV_ENC_DIR}/*.cpp
+#    ${NV_DEC_DIR}/*.h
+#    ${NV_DEC_DIR}/*.cpp
   )
   list (APPEND sources ${append_source})
 elseif(APPLE)
@@ -52,12 +61,16 @@ elseif(UNIX)
     GraphicsDevice/Vulkan/*.cpp
     GraphicsDevice/Vulkan/Cuda/*.h
     GraphicsDevice/Vulkan/Cuda/*.cpp
-    Codec/NvCodec/NvEncoder.cpp
-    Codec/NvCodec/NvEncoder.h
-    Codec/NvCodec/NvEncoderGL.cpp
-    Codec/NvCodec/NvEncoderGL.h
-    Codec/NvCodec/NvEncoderCuda.cpp
-    Codec/NvCodec/NvEncoderCuda.h
+#    Codec/NvCodec/NvEncoder.cpp
+#    Codec/NvCodec/NvEncoder.h
+#    Codec/NvCodec/NvEncoderGL.cpp
+#    Codec/NvCodec/NvEncoderGL.h
+#    Codec/NvCodec/NvEncoderCuda.cpp
+#    Codec/NvCodec/NvEncoderCuda.h
+    ${NV_ENC_DIR}/*.h
+    ${NV_ENC_DIR}/*.cpp
+#    ${NV_DEC_DIR}/*.h
+#    ${NV_DEC_DIR}/*.cpp
   )
   list (APPEND sources ${append_source})
 endif()
@@ -108,8 +121,9 @@ if(MSVC)
       Msdmo
       Dmoguids
       wmcodecdspuuid
+      ${NVCODEC_LIBRARIES}
   )
-  target_include_directories(webrtc
+  target_include_directories( webrtc
     PRIVATE
       ${CUDA_INCLUDE_DIRS}
       ${Vulkan_INCLUDE_DIR}
@@ -177,6 +191,7 @@ elseif(UNIX)
       ${WEBRTC_LIBRARIES}
       ${OPENGL_opengl_LIBRARY}
       ${Vulkan_LIBRARY}
+      ${NVCODEC_LIBRARIES}
       cuda
   )
   target_include_directories(webrtc
@@ -192,4 +207,5 @@ target_include_directories(webrtc
     ${CMAKE_SOURCE_DIR}/unity/include
     ${WEBRTC_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
+    ${NVCODEC_INCLUDE_DIR}
 )
