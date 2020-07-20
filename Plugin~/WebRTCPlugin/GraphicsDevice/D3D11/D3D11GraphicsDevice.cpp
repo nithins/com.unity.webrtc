@@ -31,6 +31,15 @@ bool D3D11GraphicsDevice::InitV() {
 void D3D11GraphicsDevice::ShutdownV() {
 }
 
+
+ITexture2D* D3D11GraphicsDevice::CreateTextureV(void* tex)
+{
+    ID3D11Texture2D* pTex = static_cast<ID3D11Texture2D*>(tex);
+    D3D11_TEXTURE2D_DESC pDesc;
+    pTex->GetDesc(&pDesc);
+    return new D3D11Texture2D(pDesc.Width, pDesc.Height, pTex);
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* D3D11GraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
 

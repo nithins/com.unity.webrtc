@@ -77,7 +77,8 @@ namespace webrtc
             m_frameHeight(height),
             m_encoderId(encoderId),
             m_buffer(data)
-        {}
+        {
+        }
 
         //webrtc::VideoFrameBuffer pure virtual functions
         // This function specifies in what pixel format the data is stored in.
@@ -97,7 +98,7 @@ namespace webrtc
             return m_frameHeight;
         }
 
-        std::vector<uint8>& buffer() const
+        const std::vector<uint8>& buffer() const
         {
             return m_buffer;
         }
@@ -122,7 +123,7 @@ namespace webrtc
         int m_frameWidth;
         int m_frameHeight;
         int m_encoderId;
-        std::vector<uint8>& m_buffer;
+        std::vector<uint8> m_buffer;
     };
     
 } // end namespace webrtc

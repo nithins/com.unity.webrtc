@@ -48,7 +48,7 @@ namespace webrtc
     int32_t DummyVideoEncoder::Encode(const webrtc::VideoFrame& frame, const std::vector<webrtc::VideoFrameType>* frameTypes)
     {
         FrameBuffer* frameBuffer = static_cast<FrameBuffer*>(frame.video_frame_buffer().get());
-        std::vector<uint8_t>& frameDataBuffer = frameBuffer->buffer();
+        const std::vector<uint8_t>& frameDataBuffer = frameBuffer->buffer();
 
         // todo(kazuki): remove it when refactor video encoding process.
         m_encoderId = frameBuffer->encoderId();
@@ -81,7 +81,7 @@ namespace webrtc
             m_setKeyFrame(m_encoderId);
         }
 
-        m_encodedImage.set_buffer(&frameDataBuffer[0], frameDataBuffer.capacity());
+        m_encodedImage.set_buffer(const_cast<uint8*>(frameDataBuffer.data()), frameDataBuffer.capacity());
         m_encodedImage.set_size(frameDataBuffer.size());
 
         m_fragHeader.VerifyAndAllocateFragmentationHeader(naluIndices.size());

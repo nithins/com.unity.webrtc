@@ -31,19 +31,11 @@ TEST_P(NvEncoderTest, IsSupported) {
     EXPECT_TRUE(encoder_->IsSupported());
 }
 
-TEST_P(NvEncoderTest, CopyBuffer) {
+TEST_P(NvEncoderTest, EncodeFrame) {
     const auto width = 256;
     const auto height = 256;
     const std::unique_ptr<ITexture2D> tex(m_device->CreateDefaultTextureV(width, height));
-    const auto result = encoder_->CopyBuffer(tex->GetEncodeTexturePtrV());
-    EXPECT_TRUE(result);
-}
-
-TEST_P(NvEncoderTest, EncodeFrame) {
-    auto before = encoder_->GetCurrentFrameCount();
-    EXPECT_TRUE(encoder_->EncodeFrame());
-    const auto after = encoder_->GetCurrentFrameCount();
-    EXPECT_EQ(before + 1, after);
+    EXPECT_TRUE(encoder_->EncodeFrame(tex->GetEncodeTexturePtrV()));
 }
 
 INSTANTIATE_TEST_CASE_P( GraphicsDeviceParameters, NvEncoderTest, testing::ValuesIn(VALUES_TEST_ENV));

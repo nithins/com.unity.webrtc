@@ -1,29 +1,9 @@
 #include "pch.h"
 #include "IEncoder.h"
-#include "Context.h"
 #include "EncoderFactory.h"
-
-#if defined(SUPPORT_OPENGL_CORE)
-#include "NvCodec/NvEncoderGL.h"
-#endif
-
-#if defined(SUPPORT_D3D11)
-#include "NvCodec/NvEncoderD3D11.h"
-#endif
-
-#if defined(SUPPORT_D3D12)
-#include "NvCodec/NvEncoderD3D12.h"
-#endif
-
 #include "SoftwareCodec/SoftwareEncoder.h"
-
-#include "NvCodec/NvEncoderCuda.h"
-
-
 #include "GraphicsDevice/IGraphicsDevice.h"
-#if defined(SUPPORT_METAL)
-#include "VideoToolbox/VTEncoderMetal.h"
-#endif
+#include "NvCodec/NvEncoderProxy.h"
 
 namespace unity
 {
@@ -40,7 +20,9 @@ namespace webrtc
 #if defined(SUPPORT_METAL)
         return false;
 #else
-        return NvEncoder::LoadModule();
+        // TODO::
+        // return NvEncoder::LoadModule();
+        return true;
 #endif
     }
 
@@ -54,7 +36,7 @@ namespace webrtc
             case GRAPHICS_DEVICE_D3D11: {
                 if (encoderType == UnityEncoderType::UnityEncoderHardware)
                 {
-                    encoder = std::make_unique<NvEncoderD3D11>(width, height, device);
+                    encoder = std::make_unique<NvEncoderProxy>(width, height, device);
                 } else {
                     encoder = std::make_unique<SoftwareEncoder>(width, height, device);
                 }
@@ -65,7 +47,7 @@ namespace webrtc
             case GRAPHICS_DEVICE_D3D12: {
                 if (encoderType == UnityEncoderType::UnityEncoderHardware)
                 {
-                    encoder = std::make_unique<NvEncoderD3D12>(width, height, device);
+                    encoder = std::make_unique<NvEncoderProxy>(width, height, device);
                 } else {
                     encoder = std::make_unique<SoftwareEncoder>(width, height, device);
                 }
@@ -80,7 +62,7 @@ namespace webrtc
 #endif
 #if defined(SUPPORT_VULKAN)
             case GRAPHICS_DEVICE_VULKAN: {
-                encoder = std::make_unique<NvEncoderCuda>(width, height, device);
+                encoder = std::make_unique<NvEncoderProxy>(width, height, device);
                 break;
             }
 #endif            

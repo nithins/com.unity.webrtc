@@ -9,8 +9,9 @@ namespace unity
 namespace webrtc
 {
 
-    NvEncoderD3D12::NvEncoderD3D12(uint32_t nWidth, uint32_t nHeight, IGraphicsDevice* device) :
-        NvEncoder(NV_ENC_DEVICE_TYPE_DIRECTX, NV_ENC_INPUT_RESOURCE_TYPE_DIRECTX, NV_ENC_BUFFER_FORMAT_ARGB, nWidth, nHeight, device)
+    NvEncoderD3D12::NvEncoderD3D12(ID3D11Device* pD3D11Device, uint32_t nWidth, uint32_t nHeight,
+        NV_ENC_BUFFER_FORMAT eBufferFormat, uint32_t nExtraOutputDelay, bool bMotionEstimationOnly, bool bOutputInVideoMemory) :
+        NvEncoder(NV_ENC_DEVICE_TYPE_DIRECTX, pD3D11Device, nWidth, nHeight, eBufferFormat, nExtraOutputDelay, bMotionEstimationOnly, bOutputInVideoMemory)
     {
     }
 
@@ -18,9 +19,9 @@ namespace webrtc
     {
     }
 
-    void* NvEncoderD3D12::AllocateInputResourceV(ITexture2D* tex) {
-        return tex->GetEncodeTexturePtrV();
-    }
-    
+    void NvEncoderD3D12::AllocateInputBuffers(int32_t numInputBuffers) {};
+
+    void NvEncoderD3D12::ReleaseInputBuffers() {};
+
 } // end namespace webrtc
 } // end namespace unity

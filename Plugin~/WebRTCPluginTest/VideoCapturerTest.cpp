@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "GraphicsDeviceTestBase.h"
-#include "../WebRTCPlugin/GraphicsDevice/ITexture2D.h"
-#include "../WebRTCPlugin/Codec/EncoderFactory.h"
-#include "../WebRTCPlugin/Codec/IEncoder.h"
-#include "../WebRTCPlugin/NvVideoCapturer.h"
+#include "GraphicsDevice/ITexture2D.h"
+#include "Codec/EncoderFactory.h"
+#include "Codec/IEncoder.h"
+#include "NvVideoCapturer.h"
 
 namespace unity
 {

@@ -95,34 +95,3 @@ set(NVCODEC_LIBRARIES
 #    set(AVUTIL_LIB ${AVUTIL_LIBRARY})
 #    set(SWRESAMPLE_LIB ${SWRESAMPLE_LIBRARY})
 #endif()
-
-
-#if(WIN32)
-#    add_subdirectory(AppEncode/AppEncD3D11)
-#    add_subdirectory(AppEncode/AppEncD3D9)
-#    add_subdirectory(AppDecode/AppDecD3D)
-#else ()
-#    #Need only linux Makefile for this
-#    add_subdirectory(AppEncode/AppEncGL)
-#endif()
-
-#add_subdirectory(AppEncode/AppEncCuda)
-#add_subdirectory(AppEncode/AppEncDec)
-#add_subdirectory(AppEncode/AppEncLowLatency)
-#add_subdirectory(AppEncode/AppEncME)
-#add_subdirectory(AppEncode/AppEncPerf)
-#add_subdirectory(AppEncode/AppEncQual)
-#add_subdirectory(AppEncode/AppMotionEstimationVkCuda)
-#add_subdirectory(AppTranscode/AppTrans)
-#add_subdirectory(AppTranscode/AppTransOneToN)
-#add_subdirectory(AppTranscode/AppTransPerf)
-#add_subdirectory(AppDecode/AppDec)
-#add_subdirectory(AppDecode/AppDecGL)
-#add_subdirectory(AppDecode/AppDecImageProvider)
-#add_subdirectory(AppDecode/AppDecLowLatency)
-#add_subdirectory(AppDecode/AppDecMem)
-#add_subdirectory(AppDecode/AppDecMultiFiles)
-#add_subdirectory(AppDecode/AppDecMultiInput)
-#add_subdirectory(AppDecode/AppDecPerf)
-
-

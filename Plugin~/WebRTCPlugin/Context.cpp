@@ -2,7 +2,7 @@
 #include "WebRTCPlugin.h"
 #include "Context.h"
 
-#include "Codec/NvCodec/NvEncoder.h"
+#include "NvEncoder.h"
 #include "DummyVideoEncoder.h"
 #include "VideoCaptureTrackSource.h"
 #include "MediaStreamObserver.h"
@@ -196,7 +196,7 @@ namespace webrtc
 
     bool Context::InitializeEncoder(IEncoder* encoder, webrtc::MediaStreamTrackInterface* track)
     {
-        if (encoder->GetCodecInitializationResult() != CodecInitializationResult::Success)
+        if (!encoder->IsSupported())
         {
             return false;
         }

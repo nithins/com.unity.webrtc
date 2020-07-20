@@ -27,12 +27,7 @@ namespace webrtc
                 LogPrint("encoder is null");
                 return false;
             }
-            if(!encoder_->CopyBuffer(unityRT))
-            {
-                LogPrint("Copy texture buffer is failed");
-                return false;
-            }
-            if(!encoder_->EncodeFrame())
+            if(!encoder_->EncodeFrame(unityRT))
             {
                 LogPrint("Encode frame is failed");
                 return false;

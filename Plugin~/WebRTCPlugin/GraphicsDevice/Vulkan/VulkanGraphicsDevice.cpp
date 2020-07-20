@@ -68,6 +68,12 @@ void VulkanGraphicsDevice::ShutdownV() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+ITexture2D* VulkanGraphicsDevice::CreateTextureV(void* tex)
+{
+    return nullptr;
+};
+
+//---------------------------------------------------------------------------------------------------------------------
 
 //Returns null if failed
 ITexture2D* VulkanGraphicsDevice::CreateDefaultTextureV(const uint32_t w, const uint32_t h) {

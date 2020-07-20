@@ -25,20 +25,15 @@ namespace webrtc
         m_initializationResult = CodecInitializationResult::Success;
     }
 
-    bool SoftwareEncoder::CopyBuffer(void* frame)
+    bool SoftwareEncoder::EncodeFrame(void* frame)
     {
         m_device->CopyResourceFromNativeV(m_encodeTex, frame);
-        return true;
-    }
-
-    bool SoftwareEncoder::EncodeFrame()
-    {
         const rtc::scoped_refptr<webrtc::I420Buffer> i420Buffer = m_device->ConvertRGBToI420(m_encodeTex);
         if (nullptr == i420Buffer)
             return false;
 
-        webrtc::VideoFrame frame = webrtc::VideoFrame::Builder().set_video_frame_buffer(i420Buffer).set_rotation(webrtc::kVideoRotation_0).set_timestamp_us(0).build();
-        CaptureFrame(frame);
+        webrtc::VideoFrame _frame = webrtc::VideoFrame::Builder().set_video_frame_buffer(i420Buffer).set_rotation(webrtc::kVideoRotation_0).set_timestamp_us(0).build();
+        CaptureFrame(_frame);
         m_frameCount++;
         return true;
     }

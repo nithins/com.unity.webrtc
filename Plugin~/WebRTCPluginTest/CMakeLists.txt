@@ -17,6 +17,8 @@ file(GLOB sources
 # Apple/Unix specific source files
 if(MSVC)
     file(GLOB append_source
+        NvCodec/*.h
+        NvCodec/*.cpp
         ../WebRTCPlugin/GraphicsDevice/Vulkan/*.h
         ../WebRTCPlugin/GraphicsDevice/Vulkan/*.cpp
         ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.h
@@ -27,14 +29,8 @@ if(MSVC)
         ../WebRTCPlugin/GraphicsDevice/D3D12/*.cpp
         ../WebRTCPlugin/Codec/SoftwareCodec/*.h
         ../WebRTCPlugin/Codec/SoftwareCodec/*.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D11.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D11.h
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D12.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D12.h
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoder.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoder.h
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.h
+        ../WebRTCPlugin/Codec/NvCodec/*.cpp
+        ../WebRTCPlugin/Codec/NvCodec/*.h
     )
     list (APPEND sources ${append_source})
 elseif(APPLE)
@@ -58,12 +54,10 @@ elseif(UNIX)
         ../WebRTCPlugin/GraphicsDevice/Vulkan/*.cpp
         ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.h
         ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoder.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoder.h
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderGL.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderGL.h
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.cpp
-        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.h
+        ../WebRTCPlugin/Codec/NvCodec/Util.cpp
+        ../WebRTCPlugin/Codec/NvCodec/Util.h
+        ../WebRTCPlugin/Codec/NvCodec/NvEncoderProxy.cpp
+        ../WebRTCPlugin/Codec/NvCodec/NvEncoderProxy.h
     )
     list (APPEND sources ${append_source})
 endif()
@@ -89,8 +83,6 @@ include(GoogleTest)
 if(MSVC)
   # Use precompiled header
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yu /Yupch.h")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /Zi")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MT /Zi")
 
   target_compile_definitions(WebRTCPluginTest
       PRIVATE
@@ -113,6 +105,7 @@ if(MSVC)
       Msdmo
       Dmoguids
       wmcodecdspuuid
+      ${NVCODEC_LIBRARIES}
   )
   target_include_directories(WebRTCPluginTest
     PRIVATE
@@ -172,6 +165,7 @@ elseif(UNIX)
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
       ${Vulkan_LIBRARY}
+      ${NVCODEC_LIBRARIES}
       cuda
   )
   target_include_directories(WebRTCPluginTest
@@ -186,7 +180,7 @@ gtest_add_tests(TARGET WebRTCPluginTest)
 target_include_directories(WebRTCPluginTest
   PRIVATE
     .
-    ../WebRTCPlugin
+    ${CMAKE_SOURCE_DIR}/WebRTCPlugin
     ${CMAKE_SOURCE_DIR}/unity/include
     ${WEBRTC_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}

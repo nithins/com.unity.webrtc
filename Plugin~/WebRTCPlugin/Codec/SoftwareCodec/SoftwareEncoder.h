@@ -1,7 +1,4 @@
 #pragma once
-#include <vector>
-#include <thread>
-#include <atomic>
 #include "Codec/IEncoder.h"
 
 namespace unity
@@ -18,8 +15,7 @@ namespace webrtc
         void InitV() override;
         void SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters) override {}
         void UpdateSettings() override {}
-        bool CopyBuffer(void* frame) override;
-        bool EncodeFrame() override;
+        bool EncodeFrame(void* frame) override;
         bool IsSupported() const override { return true; }
         void SetIdrFrame() override {}
         uint64 GetCurrentFrameCount() const override { return m_frameCount; }
