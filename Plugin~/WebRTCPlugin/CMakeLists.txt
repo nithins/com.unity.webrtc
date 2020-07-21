@@ -160,8 +160,6 @@ elseif(APPLE)
   )
 
 elseif(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-lto -fno-rtti -stdlib=libc++")
-
   target_compile_definitions(webrtc
     PRIVATE
       WEBRTC_LINUX
@@ -173,12 +171,14 @@ elseif(UNIX)
       ${OPENGL_opengl_LIBRARY}
       ${Vulkan_LIBRARY}
       ${NVCODEC_LIBRARIES}
+      ${GLEW_LIBRARIES}
       cuda
   )
   target_include_directories(webrtc
     PRIVATE
       ${CUDA_INCLUDE_DIRS}
       ${Vulkan_INCLUDE_DIR}
+      ${GLEW_INCLUDE_DIR}
   )
 endif()
 

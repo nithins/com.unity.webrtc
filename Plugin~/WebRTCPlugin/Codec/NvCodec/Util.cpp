@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "nvEncodeAPI.h"
 #include "NvEncoder.h"
+#include <dlfcn.h>
 
 namespace unity
 {

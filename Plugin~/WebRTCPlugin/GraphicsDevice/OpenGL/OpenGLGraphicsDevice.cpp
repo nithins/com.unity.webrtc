@@ -35,6 +35,11 @@ void OpenGLGraphicsDevice::ShutdownV() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+ITexture2D* OpenGLGraphicsDevice::CreateTextureV(uint32_t width, uint32_t height, void* tex)
+{
+    return new OpenGLTexture2D(width, height, (GLuint*)tex);
+}
+//---------------------------------------------------------------------------------------------------------------------
 ITexture2D* OpenGLGraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
 
     GLuint tex;
@@ -67,13 +72,12 @@ bool OpenGLGraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
 
 //---------------------------------------------------------------------------------------------------------------------
 bool OpenGLGraphicsDevice::CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) {
-    auto nativeDest = reinterpret_cast<GLuint*>(dest->GetNativeTexturePtrV());
-    auto width = dest->GetWidth();
-    auto height  = dest->GetHeight();
+    GLuint* dstName = reinterpret_cast<GLuint*>(dest->GetNativeTexturePtrV());
+    uint32_t width = dest->GetWidth();
+    uint32_t height  = dest->GetHeight();
 
-    GLuint srcName = (GLuint)(size_t)(nativeTexturePtr);
-    GLuint dstName = *nativeDest;
-    return CopyResource(dstName, srcName, width, height);
+    GLuint* srcName = (GLuint*)(nativeTexturePtr);
+    return CopyResource(*dstName, *srcName, width, height);
 }
 
 bool OpenGLGraphicsDevice::CopyResource(GLuint dstName, GLuint srcName, uint32 width, uint32 height) {

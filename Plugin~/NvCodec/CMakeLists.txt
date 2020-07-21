@@ -15,12 +15,27 @@ set(NVCODEC_INCLUDE_DIR
   "NVCODEC INCLUDE PATH"
   )
 
-file(GLOB sources
-  ${NV_ENC_DIR}/*.h
-  ${NV_ENC_DIR}/*.cpp
-  ${NV_DEC_DIR}/*.h
-  ${NV_DEC_DIR}/*.cpp
-)
+if(MSVC)
+  file(GLOB sources
+    ${NV_ENC_DIR}/*.h
+    ${NV_ENC_DIR}/*.cpp
+    ${NV_DEC_DIR}/*.h
+    ${NV_DEC_DIR}/*.cpp
+  )
+elseif(UNIX)
+  file(GLOB sources
+    ${NV_ENC_DIR}/NvEncoder.cpp
+    ${NV_ENC_DIR}/NvEncoder.h
+    ${NV_ENC_DIR}/NvEncoderCuda.cpp
+    ${NV_ENC_DIR}/NvEncoderCuda.h
+    ${NV_ENC_DIR}/NvEncoderGL.cpp
+    ${NV_ENC_DIR}/NvEncoderGL.h
+    ${NV_ENC_DIR}/NvEncoderOutputInVidMemCuda.cpp
+    ${NV_ENC_DIR}/NvEncoderOutputInVidMemCuda.h
+    ${NV_DEC_DIR}/*.h
+    ${NV_DEC_DIR}/*.cpp
+  )
+endif()
 
 add_library(NvCodec STATIC ${sources})
 

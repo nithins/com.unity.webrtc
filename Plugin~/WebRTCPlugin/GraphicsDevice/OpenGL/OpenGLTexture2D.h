@@ -19,19 +19,19 @@ public:
         m_texture = 0;
     }
 
-    inline virtual void* GetNativeTexturePtrV();
-    inline virtual const void* GetNativeTexturePtrV() const;
-    inline virtual void* GetEncodeTexturePtrV();
-    inline virtual const void* GetEncodeTexturePtrV() const;
+    inline virtual void* GetNativeTexturePtrV() override;
+    inline virtual const void* GetNativeTexturePtrV() const  override;
+    inline virtual void* GetEncodeTexturePtrV()  override;
+    inline virtual const void* GetEncodeTexturePtrV() const override;
 
 };
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void* OpenGLTexture2D::GetNativeTexturePtrV() { return &m_texture; }
-const void* OpenGLTexture2D::GetNativeTexturePtrV() const { return &m_texture; };
-void* OpenGLTexture2D::GetEncodeTexturePtrV() { return (void*)m_texture; }
-const void* OpenGLTexture2D::GetEncodeTexturePtrV() const { return (const void*)m_texture; }
+void* OpenGLTexture2D::GetNativeTexturePtrV() { return (void*)&m_texture; }
+const void* OpenGLTexture2D::GetNativeTexturePtrV() const { return (const void*)&m_texture; };
+void* OpenGLTexture2D::GetEncodeTexturePtrV() { return (void*)&m_texture; }
+const void* OpenGLTexture2D::GetEncodeTexturePtrV() const { return (const void*)&m_texture; }
 
 } // end namespace webrtd
 } // end namespace unity

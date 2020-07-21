@@ -169,12 +169,14 @@ namespace webrtc
 
         const NvEncInputFrame* inputFrame = m_encoder->GetNextInputFrame();
         void* inputPtr = inputFrame->inputPtr;
+#if defined(SUPPORT_D3D12)
         if(m_deviceType == GraphicsDeviceType::GRAPHICS_DEVICE_D3D12)
         {
             NvEncoderD3D12* pEncoderD3D12 = static_cast<NvEncoderD3D12*>(m_encoder.get());
             inputPtr = pEncoderD3D12->GetD3D12Resource(inputPtr);
         }
-        ITexture2D* inputTex = m_device->CreateTextureV(inputPtr);
+#endif
+        ITexture2D* inputTex = m_device->CreateTextureV(m_width, m_height, inputPtr);
         m_device->CopyResourceFromNativeV(inputTex, frame);
 
 #pragma region start encoding

@@ -152,6 +152,7 @@ void* CreateDevice(UnityGfxRenderer renderer)
         glutInit(&argc, nullptr);
         s_glutInitialized = true;
         glutCreateWindow("test");
+        glewInit();
     }
     return nullptr;
 }

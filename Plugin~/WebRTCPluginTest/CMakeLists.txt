@@ -54,6 +54,8 @@ elseif(UNIX)
         ../WebRTCPlugin/GraphicsDevice/Vulkan/*.cpp
         ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.h
         ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.cpp
+        ../WebRTCPlugin/Codec/SoftwareCodec/*.h
+        ../WebRTCPlugin/Codec/SoftwareCodec/*.cpp
         ../WebRTCPlugin/Codec/NvCodec/Util.cpp
         ../WebRTCPlugin/Codec/NvCodec/Util.h
         ../WebRTCPlugin/Codec/NvCodec/NvEncoderProxy.cpp
@@ -145,10 +147,7 @@ elseif(APPLE)
       ..
   )
 elseif(UNIX)
-  find_package(OpenGL REQUIRED)
   find_package(GLUT REQUIRED)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-lto -fno-rtti -stdlib=libc++")
-
   target_compile_definitions(WebRTCPluginTest
     PRIVATE
       WEBRTC_LINUX
@@ -166,13 +165,15 @@ elseif(UNIX)
       ${CMAKE_THREAD_LIBS_INIT}
       ${Vulkan_LIBRARY}
       ${NVCODEC_LIBRARIES}
+      ${GLEW_LIBRARIES}
       cuda
   )
   target_include_directories(WebRTCPluginTest
     PRIVATE
       ..
       ${CUDA_INCLUDE_DIRS}
-  )
+      ${GLEW_INCLUDE_DIR}
+    )
 endif()
 
 gtest_add_tests(TARGET WebRTCPluginTest)

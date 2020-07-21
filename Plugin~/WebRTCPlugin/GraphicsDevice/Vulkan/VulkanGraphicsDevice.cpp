@@ -68,7 +68,7 @@ void VulkanGraphicsDevice::ShutdownV() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-ITexture2D* VulkanGraphicsDevice::CreateTextureV(void* tex)
+ITexture2D* VulkanGraphicsDevice::CreateTextureV(uint32_t width, uint32_t height, void* tex)
 {
     return nullptr;
 };

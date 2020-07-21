@@ -80,8 +80,9 @@
 
 #if defined(SUPPORT_OPENGL_CORE)
 #define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 #endif
 
 #if defined(SUPPORT_METAL)
