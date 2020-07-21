@@ -13,7 +13,7 @@ namespace webrtc
 
 class D3D12Texture2D : public ITexture2D {
 public:
-
+    D3D12Texture2D(uint32_t w, uint32_t h, ID3D12Resource* nativeTex);
     D3D12Texture2D(uint32_t w, uint32_t h,ID3D12Resource* nativeTex, HANDLE handle, ID3D11Texture2D* sharedTex);
 
     virtual ~D3D12Texture2D() {

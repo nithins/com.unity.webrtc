@@ -18,6 +18,8 @@
 #include <d3d11.h>
 #include "NvEncoder.h"
 
+DXGI_FORMAT GetD3D11Format(NV_ENC_BUFFER_FORMAT eBufferFormat);
+
 class NvEncoderD3D11 : public NvEncoder
 {
 public:

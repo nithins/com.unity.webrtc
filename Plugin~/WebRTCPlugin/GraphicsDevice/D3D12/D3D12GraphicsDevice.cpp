@@ -89,13 +89,9 @@ void D3D12GraphicsDevice::ShutdownV() {
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* D3D12GraphicsDevice::CreateTextureV(void* tex)
 {
-    /*
-    D3D12Texture2D* pTex = static_cast<D3D12Texture2D*>(tex);
-    D3D12_TEXTURE2D_DESC pDesc;
-    pTex->GetDesc(&pDesc);
-    return new D3D11Texture2D(pDesc.Width, pDesc.Height, pTex);
-    */
-    return nullptr;
+    ID3D12Resource* pTex = static_cast<ID3D12Resource*>(tex);
+    D3D12_RESOURCE_DESC pDesc = pTex->GetDesc();
+    return new D3D12Texture2D(pDesc.Width, pDesc.Height, pTex);
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -106,7 +102,7 @@ ITexture2D* D3D12GraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-    bool D3D12GraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
+bool D3D12GraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
     //[Note-sin: 2020-2-19] This function is currently not required by RenderStreaming. Delete?
     return true;
 }

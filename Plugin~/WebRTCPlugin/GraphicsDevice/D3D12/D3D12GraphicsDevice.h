@@ -85,8 +85,7 @@ private:
 
 //---------------------------------------------------------------------------------------------------------------------
 
-//use D3D11. See notes below
-void* D3D12GraphicsDevice::GetEncodeDevicePtrV() { return reinterpret_cast<void*>(m_d3d11Device); }
+void* D3D12GraphicsDevice::GetEncodeDevicePtrV() { return reinterpret_cast<void*>(m_d3d12Device); }
 GraphicsDeviceType D3D12GraphicsDevice::GetDeviceType() const { return GRAPHICS_DEVICE_D3D12; }
 
 } // end namespace webrtc

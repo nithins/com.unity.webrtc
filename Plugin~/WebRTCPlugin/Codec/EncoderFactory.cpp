@@ -30,53 +30,18 @@ namespace webrtc
     std::unique_ptr<IEncoder> EncoderFactory::Init(int width, int height, IGraphicsDevice* device, UnityEncoderType encoderType)
     {
         std::unique_ptr<IEncoder> encoder;
-        const GraphicsDeviceType deviceType = device->GetDeviceType();
-        switch (deviceType) {
-#if defined(SUPPORT_D3D11)
-            case GRAPHICS_DEVICE_D3D11: {
-                if (encoderType == UnityEncoderType::UnityEncoderHardware)
-                {
-                    encoder = std::make_unique<NvEncoderProxy>(width, height, device);
-                } else {
-                    encoder = std::make_unique<SoftwareEncoder>(width, height, device);
-                }
-                break;
-            }
-#endif
-#if defined(SUPPORT_D3D12)
-            case GRAPHICS_DEVICE_D3D12: {
-                if (encoderType == UnityEncoderType::UnityEncoderHardware)
-                {
-                    encoder = std::make_unique<NvEncoderProxy>(width, height, device);
-                } else {
-                    encoder = std::make_unique<SoftwareEncoder>(width, height, device);
-                }
-                break;
-            }
-#endif
-#if defined(SUPPORT_OPENGL_CORE)
-            case GRAPHICS_DEVICE_OPENGL: {
-                encoder = std::make_unique<NvEncoderGL>(width, height, device);
-                break;
-            }
-#endif
-#if defined(SUPPORT_VULKAN)
-            case GRAPHICS_DEVICE_VULKAN: {
-                encoder = std::make_unique<NvEncoderProxy>(width, height, device);
-                break;
-            }
-#endif            
 #if defined(SUPPORT_METAL) && defined(SUPPORT_SOFTWARE_ENCODER)
-            case GRAPHICS_DEVICE_METAL: {
-                encoder = std::make_unique<SoftwareEncoder>(width, height, device);
-                break;
-            }
-#endif            
-            default: {
-                throw std::invalid_argument("Invalid device to initialize NvEncoder");
-                break;
-            }           
+        encoder = std::make_unique<SoftwareEncoder>(width, height, device);
+#else
+        if (encoderType == UnityEncoderType::UnityEncoderHardware)
+        {
+            const GraphicsDeviceType deviceType = device->GetDeviceType();
+            encoder = std::make_unique<NvEncoderProxy>(width, height, device, deviceType);
         }
+        else {
+            encoder = std::make_unique<SoftwareEncoder>(width, height, device);
+        }
+#endif            
         encoder->InitV();
         return encoder;
     }

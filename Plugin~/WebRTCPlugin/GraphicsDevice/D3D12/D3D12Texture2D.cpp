@@ -9,6 +9,13 @@ namespace webrtc
 {
 
 //---------------------------------------------------------------------------------------------------------------------
+D3D12Texture2D::D3D12Texture2D(uint32_t w, uint32_t h, ID3D12Resource* nativeTex)
+    : ITexture2D(w, h)
+    , m_nativeTexture(nativeTex), m_sharedHandle(nullptr), m_sharedTexture(nullptr)
+    , m_readbackResource(nullptr), m_nativeTextureFootprint(nullptr)
+{
+}
+//---------------------------------------------------------------------------------------------------------------------
 
 D3D12Texture2D::D3D12Texture2D(uint32_t w, uint32_t h, ID3D12Resource* nativeTex, HANDLE handle
                                , ID3D11Texture2D* sharedTex)
@@ -16,7 +23,6 @@ D3D12Texture2D::D3D12Texture2D(uint32_t w, uint32_t h, ID3D12Resource* nativeTex
     , m_nativeTexture(nativeTex), m_sharedHandle(handle), m_sharedTexture(sharedTex)
     , m_readbackResource(nullptr), m_nativeTextureFootprint(nullptr)
 {
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------

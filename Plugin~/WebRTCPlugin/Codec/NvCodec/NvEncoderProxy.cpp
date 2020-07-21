@@ -26,11 +26,43 @@ namespace unity
 namespace webrtc
 {
 
-    NvEncoderProxy::NvEncoderProxy(const int width, const int height, IGraphicsDevice* device) :
-        m_width(width), m_height(height), m_device(device)
+    NvEncoderProxy::NvEncoderProxy(const int width, const int height, IGraphicsDevice* device, GraphicsDeviceType deviceType) :
+        m_width(width), m_height(height), m_device(device), m_deviceType(deviceType)
     {
-        ID3D11Device* pDevice = static_cast<ID3D11Device*>(device->GetEncodeDevicePtrV());
-        m_encoder = std::make_unique<NvEncoderD3D11>(pDevice, width, height, NV_ENC_BUFFER_FORMAT_ARGB);
+        switch(deviceType)
+        {
+        case GraphicsDeviceType::GRAPHICS_DEVICE_D3D11:
+        {
+#if defined(SUPPORT_D3D11)
+            ID3D11Device* pDevice = static_cast<ID3D11Device*>(device->GetEncodeDevicePtrV());
+            m_encoder = std::make_unique<NvEncoderD3D11>(pDevice, width, height, NV_ENC_BUFFER_FORMAT_ARGB, 0);
+            break;
+#endif
+        }
+        case GraphicsDeviceType::GRAPHICS_DEVICE_D3D12:
+        {
+#if defined(SUPPORT_D3D12)
+            ID3D12Device* pD3D12Device = static_cast<ID3D12Device*>(device->GetEncodeDevicePtrV());
+            m_encoder = std::make_unique<NvEncoderD3D12>(pD3D12Device, width, height, NV_ENC_BUFFER_FORMAT_ARGB, 0);
+            break;
+#endif
+        }
+        case GraphicsDeviceType::GRAPHICS_DEVICE_OPENGL:
+        {
+#if defined(SUPPORT_OPENGL_CORE)
+            m_encoder = std::make_unique<NvEncoderGL>(width, height, NV_ENC_BUFFER_FORMAT_ARGB, 0);
+            break;
+#endif
+        }
+        case GraphicsDeviceType::GRAPHICS_DEVICE_VULKAN:
+        {
+#if defined(SUPPORT_VULKAN)
+            CUcontext cuContext = static_cast<CUcontext>(device->GetEncodeDevicePtrV());
+            m_encoder = std::make_unique<NvEncoderCuda>(cuContext, width, height, NV_ENC_BUFFER_FORMAT_ARGB, 0);
+            break;
+#endif
+        }
+        }
         m_bitrateAdjuster = std::make_unique<::webrtc::BitrateAdjuster>(0.5f, 0.95f);
     }
 
@@ -61,7 +93,7 @@ namespace webrtc
             NV_ENC_PRESET_P1_GUID,
             NV_ENC_TUNING_INFO_ULTRA_LOW_LATENCY);
 
-#pragma region get preset ocnfig and set it
+#pragma region get preset config and set it
         nvEncConfig.gopLength = NVENC_INFINITE_GOPLENGTH;
         nvEncConfig.frameIntervalP = 1;
         nvEncConfig.encodeCodecConfig.h264Config.idrPeriod = NVENC_INFINITE_GOPLENGTH;
@@ -136,7 +168,13 @@ namespace webrtc
         UpdateSettings();
 
         const NvEncInputFrame* inputFrame = m_encoder->GetNextInputFrame();
-        ITexture2D* inputTex = m_device->CreateTextureV(inputFrame->inputPtr);
+        void* inputPtr = inputFrame->inputPtr;
+        if(m_deviceType == GraphicsDeviceType::GRAPHICS_DEVICE_D3D12)
+        {
+            NvEncoderD3D12* pEncoderD3D12 = static_cast<NvEncoderD3D12*>(m_encoder.get());
+            inputPtr = pEncoderD3D12->GetD3D12Resource(inputPtr);
+        }
+        ITexture2D* inputTex = m_device->CreateTextureV(inputPtr);
         m_device->CopyResourceFromNativeV(inputTex, frame);
 
 #pragma region start encoding

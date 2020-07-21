@@ -1,6 +1,7 @@
 #pragma once
 #include "Codec/IEncoder.h"
 #include "NvEncoder.h"
+#include "GraphicsDevice/GraphicsDeviceType.h"
 
 namespace unity
 {
@@ -11,7 +12,7 @@ namespace webrtc
     class NvEncoderProxy : public IEncoder
     {
     public:
-        NvEncoderProxy(int width, int height, IGraphicsDevice* device);
+        NvEncoderProxy(int width, int height, IGraphicsDevice* device, GraphicsDeviceType deviceType);
         virtual ~NvEncoderProxy();
         void InitV() override;
         void SetRates(const ::webrtc::VideoEncoder::RateControlParameters& parameters) override;
@@ -31,6 +32,7 @@ namespace webrtc
         int m_height;
         uint32_t m_frameRate = 30;
         IGraphicsDevice* m_device;
+        GraphicsDeviceType m_deviceType;
         bool isIdrFrame = false;
         std::unique_ptr<NvEncoder> m_encoder;
         std::unique_ptr<webrtc::BitrateAdjuster> m_bitrateAdjuster;
