@@ -15,7 +15,7 @@ public:
     virtual bool InitV() override;
     virtual void ShutdownV() override;
     inline virtual void* GetEncodeDevicePtrV() override;
-    ITexture2D* CreateTextureV(void* tex) override;
+    virtual ITexture2D* CreateTextureV(uint32_t width, uint32_t height, void* tex) override;
     virtual ITexture2D* CreateDefaultTextureV(uint32_t w, uint32_t h) override;
     virtual ITexture2D* CreateCPUReadTextureV(uint32_t w, uint32_t h) override;
     virtual bool CopyResourceV(ITexture2D* dest, ITexture2D* src) override;

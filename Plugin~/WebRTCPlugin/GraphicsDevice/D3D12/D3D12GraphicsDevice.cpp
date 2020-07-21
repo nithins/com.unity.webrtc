@@ -87,12 +87,11 @@ void D3D12GraphicsDevice::ShutdownV() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-ITexture2D* D3D12GraphicsDevice::CreateTextureV(void* tex)
+ITexture2D* D3D12GraphicsDevice::CreateTextureV(uint32_t width, uint32_t height, void* tex)
 {
     ID3D12Resource* pTex = static_cast<ID3D12Resource*>(tex);
-    D3D12_RESOURCE_DESC pDesc = pTex->GetDesc();
-    return new D3D12Texture2D(pDesc.Width, pDesc.Height, pTex);
-};
+    return new D3D12Texture2D(width, height, pTex);
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* D3D12GraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
