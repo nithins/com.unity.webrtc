@@ -2,8 +2,8 @@
 
 #include "Codec/EncoderFactory.h"
 #include "Context.h"
-#include "IUnityGraphics.h"
 #include "GraphicsDevice/GraphicsDevice.h"
+#include "UnityRenderEvent.h"
 
 enum class VideoStreamRenderEventID
 {
@@ -19,9 +19,11 @@ namespace webrtc
 
     IUnityInterfaces* s_UnityInterfaces = nullptr;
     IUnityGraphics* s_Graphics = nullptr;
+    UnityGfxRenderer s_gfxRenderer = UnityGfxRenderer::kUnityGfxRendererNull;
     Context* s_context = nullptr;
     std::map<const ::webrtc::MediaStreamTrackInterface*, std::unique_ptr<IEncoder>> s_mapEncoder;
 
+    UnityGfxRenderer GetGfxRenderer() { return s_gfxRenderer; }
 } // end namespace webrtc
 } // end namespace unity
 
@@ -58,6 +60,7 @@ extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityPluginLoad(IUnit
 {
     s_UnityInterfaces = unityInterfaces;
     s_Graphics = unityInterfaces->Get<IUnityGraphics>();
+    s_gfxRenderer = s_Graphics->GetRenderer();
     s_Graphics->RegisterDeviceEventCallback(OnGraphicsDeviceEvent);
     OnGraphicsDeviceEvent(kUnityGfxDeviceEventInitialize);
 }

@@ -8,6 +8,6 @@ namespace webrtc
     bool LoadModule();
     void UnloadModule();
     bool CheckDriverVersion();
-    bool IsSupportedGraphicsDevice(GraphicsDeviceType deviceType);
+    bool IsSupportedGraphicsDevice(UnityGfxRenderer renderer);
 } // end namespace webrtc
 } // end namespace unity

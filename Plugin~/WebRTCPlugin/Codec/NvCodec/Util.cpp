@@ -61,18 +61,18 @@ namespace webrtc
         return true;
     }
 
-    bool IsSupportedGraphicsDevice(GraphicsDeviceType deviceType)
+    bool IsSupportedGraphicsDevice(UnityGfxRenderer renderer)
     {
-        switch(deviceType)
+        switch(renderer)
         {
 #ifdef UNITY_WIN
-        case GraphicsDeviceType::GRAPHICS_DEVICE_D3D11:
-        case GraphicsDeviceType::GRAPHICS_DEVICE_D3D12:
-        // case GraphicsDeviceType::GRAPHICS_DEVICE_VULKAN:
+        case UnityGfxRenderer::kUnityGfxRendererD3D11:
+        case UnityGfxRenderer::kUnityGfxRendererD3D12:
+        // case UnityGfxRenderer::kUnityGfxRendererVulkan:
             return true;
 #endif
 #ifdef UNITY_LINUX
-        case GraphicsDeviceType::GRAPHICS_DEVICE_OPENGL:
+        case UnityGfxRenderer::kUnityGfxRendererOpenGLCore:
         // case UnityGfxRenderer::GRAPHICS_DEVICE_VULKAN:
             return true;
 #endif

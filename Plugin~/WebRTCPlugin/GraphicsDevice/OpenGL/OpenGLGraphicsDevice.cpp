@@ -1,6 +1,7 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "OpenGLGraphicsDevice.h"
 #include "OpenGLTexture2D.h"
+#include "GraphicsDevice/GraphicsUtility.h"
 
 namespace unity
 {
@@ -17,7 +18,14 @@ OpenGLGraphicsDevice::~OpenGLGraphicsDevice() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool OpenGLGraphicsDevice::InitV() {
+bool OpenGLGraphicsDevice::InitV()
+{
+#if defined(UNITY_WIN)
+    glewExperimental = GL_TRUE;
+    const GLenum err = glewInit();
+    if (err != GLEW_OK)
+        return false;
+#endif
 #if _DEBUG
     GLuint unusedIds = 0;
     glEnable(GL_DEBUG_OUTPUT);
@@ -37,7 +45,7 @@ void OpenGLGraphicsDevice::ShutdownV() {
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* OpenGLGraphicsDevice::CreateTextureV(uint32_t width, uint32_t height, void* tex)
 {
-    return new OpenGLTexture2D(width, height, (GLuint*)tex);
+    return new OpenGLTexture2D(width, height, reinterpret_cast<GLuint>(tex));
 }
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* OpenGLGraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
@@ -47,37 +55,35 @@ ITexture2D* OpenGLGraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) 
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, w, h);
     glBindTexture(GL_TEXTURE_2D, 0);
-    return new OpenGLTexture2D(w, h, &tex);
+    return new OpenGLTexture2D(w, h, tex);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-ITexture2D* OpenGLGraphicsDevice::CreateCPUReadTextureV(uint32_t w, uint32_t h) {
-    assert(false && "CreateCPUReadTextureV need to implement on OpenGL");
-    return nullptr;
+ITexture2D* OpenGLGraphicsDevice::CreateCPUReadTextureV(uint32_t w, uint32_t h)
+{
+    OpenGLTexture2D* tex = static_cast<OpenGLTexture2D*>(CreateDefaultTextureV(w, h));
+    tex->CreatePBO();
+    return tex;
 }
-
 
 //---------------------------------------------------------------------------------------------------------------------
 bool OpenGLGraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
-    auto nativeDest = reinterpret_cast<GLuint*>(dest->GetNativeTexturePtrV());
-    auto nativeSrc = reinterpret_cast<GLuint*>(src->GetNativeTexturePtrV());
-    auto width = dest->GetWidth();
-    auto height  = dest->GetHeight();
-
-    GLuint srcName = *nativeSrc;
-    GLuint dstName = *nativeDest;
+    const GLuint dstName = reinterpret_cast<GLuint>(dest->GetNativeTexturePtrV());
+    const GLuint srcName = reinterpret_cast<GLuint>(src->GetNativeTexturePtrV());
+    const uint32_t width = dest->GetWidth();
+    const uint32_t height  = dest->GetHeight();
     return CopyResource(dstName, srcName, width, height);
 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 bool OpenGLGraphicsDevice::CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) {
-    GLuint* dstName = reinterpret_cast<GLuint*>(dest->GetNativeTexturePtrV());
-    uint32_t width = dest->GetWidth();
-    uint32_t height  = dest->GetHeight();
+    const GLuint dstName = reinterpret_cast<GLuint>(dest->GetNativeTexturePtrV());
+    const uint32_t width = dest->GetWidth();
+    const uint32_t height  = dest->GetHeight();
 
-    GLuint* srcName = (GLuint*)(nativeTexturePtr);
-    return CopyResource(*dstName, *srcName, width, height);
+    GLuint srcName = (GLuint)(nativeTexturePtr);
+    return CopyResource(dstName, srcName, width, height);
 }
 
 bool OpenGLGraphicsDevice::CopyResource(GLuint dstName, GLuint srcName, uint32 width, uint32 height) {
@@ -105,8 +111,36 @@ bool OpenGLGraphicsDevice::CopyResource(GLuint dstName, GLuint srcName, uint32 w
 
 rtc::scoped_refptr<webrtc::I420Buffer> OpenGLGraphicsDevice::ConvertRGBToI420(ITexture2D* tex)
 {
-    assert(false && "ConvertRGBToI420 need to implement on OpenGL");
-    return nullptr;
+    OpenGLTexture2D* sourceTex = static_cast<OpenGLTexture2D*>(tex);
+    const GLuint sourceId = reinterpret_cast<GLuint>(tex->GetNativeTexturePtrV());
+    const GLuint pbo = sourceTex->GetPBO();
+
+    // Send normal texture data to the PBO
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+    glBindTexture(GL_TEXTURE_2D, sourceId);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
+
+    uint32_t buffSize = sourceTex->GetBufferSize();
+    byte* data = sourceTex->GetBuffer();
+
+    // Send PBO to main memory
+    GLubyte* pboPtr = static_cast<GLubyte*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
+    if (pboPtr)
+    {
+        memcpy(data, pboPtr, buffSize);
+        glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+    }
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+    const uint32_t width = tex->GetWidth();
+    const uint32_t height = tex->GetHeight();
+    const uint32_t pitch = sourceTex->GetPitch();
+
+    rtc::scoped_refptr<webrtc::I420Buffer> i420_buffer = GraphicsUtility::ConvertRGBToI420Buffer(
+        width, height, pitch, static_cast<uint8_t*>(data)
+    );
+    return i420_buffer;
 }
 
 } // end namespace webrtc

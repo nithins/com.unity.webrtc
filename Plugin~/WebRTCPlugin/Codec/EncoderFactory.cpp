@@ -2,7 +2,8 @@
 #include "IEncoder.h"
 #include "EncoderFactory.h"
 
-#include "GraphicsDevice/GraphicsDevice.h"
+
+#include "UnityRenderEvent.h"
 #include "SoftwareCodec/SoftwareEncoder.h"
 #include "GraphicsDevice/IGraphicsDevice.h"
 #include "NvCodec/NvEncoderProxy.h"
@@ -20,8 +21,8 @@ namespace webrtc
 
     bool EncoderFactory::GetHardwareEncoderSupport()
     {
-        IGraphicsDevice* device = GraphicsDevice::GetInstance().GetDevice();
-        return IsSupportedGraphicsDevice(device->GetDeviceType());
+        UnityGfxRenderer renderer = GetGfxRenderer();
+        return IsSupportedGraphicsDevice(renderer);
     }
 
     //Can throw exception. The caller is expected to catch it.
@@ -34,7 +35,7 @@ namespace webrtc
 
         GraphicsDeviceType deviceType = device->GetDeviceType();
         if (encoderType == UnityEncoderType::UnityEncoderHardware &&
-            IsSupportedGraphicsDevice(deviceType))
+            GetHardwareEncoderSupport())
         {
             encoder = std::make_unique<NvEncoderProxy>(width, height, device, deviceType);
         }

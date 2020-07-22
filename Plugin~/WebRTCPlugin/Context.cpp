@@ -212,7 +212,11 @@ namespace webrtc
 
     bool Context::FinalizeEncoder(IEncoder* encoder)
     {
-        m_mapIdAndEncoder.erase(encoder->Id());
+        uint32_t id = encoder->Id();
+        if(m_mapIdAndEncoder.find(id) != m_mapIdAndEncoder.end())
+        {
+            m_mapIdAndEncoder.erase(encoder->Id());
+        }
         return true;
     }
 

@@ -145,7 +145,6 @@ void* CreateDeviceOpenGL()
         glutInit(&argc, nullptr);
         s_glutInitialized = true;
         glutCreateWindow("test");
-        glewInit();
     }
     return nullptr;
 }

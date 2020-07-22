@@ -22,19 +22,18 @@ TEST(UtilTest, DriverVersion)
 TEST(UtilTest, IsSupportedGraphicsDevice)
 {
 #ifdef UNITY_WIN
-    EXPECT_TRUE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_D3D11));
-    EXPECT_TRUE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_D3D12));
-    EXPECT_FALSE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_VULKAN));
-    EXPECT_FALSE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_OPENGL));
+    EXPECT_TRUE(IsSupportedGraphicsDevice(kUnityGfxRendererD3D11));
+    EXPECT_TRUE(IsSupportedGraphicsDevice(kUnityGfxRendererD3D12));
+    EXPECT_FALSE(IsSupportedGraphicsDevice(kUnityGfxRendererVulkan));
+    EXPECT_FALSE(IsSupportedGraphicsDevice(kUnityGfxRendererOpenGLCore));
 #endif
 #ifdef UNITY_LINUX
-    EXPECT_TRUE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_OPENGL));
-    EXPECT_FALSE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_VULKAN));
-    EXPECT_FALSE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_METAL));
+    EXPECT_TRUE(IsSupportedGraphicsDevice(kUnityGfxRendererOpenGLCore));
+    EXPECT_FALSE(IsSupportedGraphicsDevice(kUnityGfxRendererVulkan));
 #endif
 #ifdef UNITY_MAC
-    EXPECT_FALSE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_OPENGL));
-    EXPECT_FALSE(IsSupportedGraphicsDevice(GRAPHICS_DEVICE_METAL));
+    EXPECT_FALSE(IsSupportedGraphicsDevice(kUnityGfxRendererOpenGLCore));
+    EXPECT_FALSE(IsSupportedGraphicsDevice(kUnityGfxRendererMetal));
 #endif
 }
 

@@ -12,7 +12,6 @@ unzip -d $SOLUTION_DIR/webrtc webrtc.zip
 curl -L $GLEW_DOWNLOAD_URL > glew.zip
 unzip -d $SOLUTION_DIR/glew glew.zip 
 
-
 # Install libc++, libc++abi googletest clang glut
 # TODO:: Remove this install process from here and recreate an image to build the plugin.
 sudo apt update

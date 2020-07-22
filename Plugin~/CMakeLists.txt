@@ -28,6 +28,7 @@ list(APPEND CMAKE_MODULE_PATH
 
 list(APPEND CMAKE_PREFIX_PATH 
   "glew"
+  "glut"
 )
 
 find_package(WebRTC REQUIRED)
@@ -38,6 +39,7 @@ else()
   find_package(CUDA REQUIRED)
   find_package(Vulkan REQUIRED)
   find_package(GLEW REQUIRED)
+  find_package(GLUT REQUIRED)
   find_package(OpenGL REQUIRED)
   add_subdirectory(NvCodec)
 endif()

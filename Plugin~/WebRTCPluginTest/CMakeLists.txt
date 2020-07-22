@@ -89,7 +89,6 @@ find_package(GMock REQUIRED)
 include(GoogleTest)
 
 if(MSVC)
-  find_package(GLUT REQUIRED)
 
   # Use precompiled header
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yu /Yupch.h")
@@ -103,7 +102,7 @@ if(MSVC)
       PRIVATE
       ${WEBRTC_LIBRARIES}
       ${OPENGL_LIBRARIES}
-      ${GLUT_LIBRARY} 
+      ${GLUT_LIBRARIES}
       ${Vulkan_LIBRARY}
       ${CUDA_CUDA_LIBRARY}
       ${GTEST_MAIN_LIBRARIES}
@@ -125,6 +124,7 @@ if(MSVC)
       ${CUDA_INCLUDE_DIRS}
       ${Vulkan_INCLUDE_DIR}
       ${GLEW_INCLUDE_DIR}
+      ${GLUT_INCLUDE_DIR}
   )    
   set_target_properties( WebRTCPluginTest 
     PROPERTIES LINK_FLAGS 
@@ -159,7 +159,6 @@ elseif(APPLE)
       ..
   )
 elseif(UNIX)
-  find_package(GLUT REQUIRED)
   target_compile_definitions(WebRTCPluginTest
     PRIVATE
       WEBRTC_LINUX
@@ -170,7 +169,7 @@ elseif(UNIX)
     PRIVATE
       ${WEBRTC_LIBRARIES}
       ${OPENGL_opengl_LIBRARY}
-      ${GLUT_LIBRARY}
+      ${GLUT_LIBRARIES}
       ${CMAKE_DL_LIBS}
       ${GTEST_MAIN_LIBRARIES}
       ${GTEST_LIBRARIES}
@@ -185,6 +184,7 @@ elseif(UNIX)
       ..
       ${CUDA_INCLUDE_DIRS}
       ${GLEW_INCLUDE_DIR}
+      ${GLUT_INCLUDE_DIR}
     )
 endif()
 
