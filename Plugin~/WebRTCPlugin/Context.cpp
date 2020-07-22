@@ -9,6 +9,7 @@
 #include "SetSessionDescriptionObserver.h"
 #include "UnityVideoEncoderFactory.h"
 #include "UnityVideoDecoderFactory.h"
+#include "Codec/EncoderFactory.h"
 
 namespace unity
 {
@@ -153,8 +154,10 @@ namespace webrtc
         std::unique_ptr<webrtc::VideoDecoderFactory> videoDecoderFactory = webrtc::CreateBuiltinVideoDecoderFactory();
 #else
         std::unique_ptr<webrtc::VideoEncoderFactory> videoEncoderFactory =
-            m_encoderType == UnityEncoderType::UnityEncoderHardware ?
+            m_encoderType == UnityEncoderType::UnityEncoderHardware &&
+            EncoderFactory::GetHardwareEncoderSupport() ?
             std::make_unique<UnityVideoEncoderFactory>(static_cast<IVideoEncoderObserver*>(this)) : webrtc::CreateBuiltinVideoEncoderFactory();
+
         std::unique_ptr<webrtc::VideoDecoderFactory> videoDecoderFactory =
             m_encoderType == UnityEncoderType::UnityEncoderHardware ?
             std::make_unique<UnityVideoDecoderFactory>() : webrtc::CreateBuiltinVideoDecoderFactory();

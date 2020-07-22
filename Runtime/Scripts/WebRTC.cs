@@ -296,11 +296,10 @@ namespace Unity.WebRTC
             if (Application.platform != RuntimePlatform.LinuxEditor &&
                 Application.platform != RuntimePlatform.LinuxPlayer)
             {
-                if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore ||
-                    SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2 ||
+                if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2 ||
                     SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3)
                 {
-                    Debug.LogError($"Not Support OpenGL API on {Application.platform}.");
+                    Debug.LogError($"Not Support OpenGLES2 and OpenGLES3 API on {Application.platform}.");
 #if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
                     return;
