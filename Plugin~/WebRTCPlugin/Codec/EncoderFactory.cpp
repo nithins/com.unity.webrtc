@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "IEncoder.h"
 #include "EncoderFactory.h"
+
+#include "GraphicsDevice/GraphicsDevice.h"
 #include "SoftwareCodec/SoftwareEncoder.h"
 #include "GraphicsDevice/IGraphicsDevice.h"
 #include "NvCodec/NvEncoderProxy.h"
+#include "NvCodec/Util.h"
 
 namespace unity
 {
@@ -17,13 +20,8 @@ namespace webrtc
 
     bool EncoderFactory::GetHardwareEncoderSupport()
     {
-#if defined(SUPPORT_METAL)
-        return false;
-#else
-        // TODO::
-        // return NvEncoder::LoadModule();
-        return true;
-#endif
+        IGraphicsDevice* device = GraphicsDevice::GetInstance().GetDevice();
+        return IsSupportedGraphicsDevice(device->GetDeviceType());
     }
 
     //Can throw exception. The caller is expected to catch it.
@@ -33,12 +31,15 @@ namespace webrtc
 #if defined(SUPPORT_METAL) && defined(SUPPORT_SOFTWARE_ENCODER)
         encoder = std::make_unique<SoftwareEncoder>(width, height, device);
 #else
-        if (encoderType == UnityEncoderType::UnityEncoderHardware)
+
+        GraphicsDeviceType deviceType = device->GetDeviceType();
+        if (encoderType == UnityEncoderType::UnityEncoderHardware &&
+            IsSupportedGraphicsDevice(deviceType))
         {
-            const GraphicsDeviceType deviceType = device->GetDeviceType();
             encoder = std::make_unique<NvEncoderProxy>(width, height, device, deviceType);
         }
-        else {
+        else
+        {
             encoder = std::make_unique<SoftwareEncoder>(width, height, device);
         }
 #endif            

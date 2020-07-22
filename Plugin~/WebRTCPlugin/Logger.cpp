@@ -33,7 +33,7 @@ namespace webrtc
         }
     }
 
-#if defined(SUPPORT_OPENGL_CORE)
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
     void OnOpenGLDebugMessage(
             GLenum source,
             GLenum type,

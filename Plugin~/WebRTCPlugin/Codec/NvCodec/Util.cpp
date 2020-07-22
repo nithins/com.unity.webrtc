@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "nvEncodeAPI.h"
 #include "NvEncoder.h"
+#include "GraphicsDevice/GraphicsDeviceType.h"
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
@@ -58,6 +59,25 @@ namespace webrtc
             return false;
         }
         return true;
+    }
+
+    bool IsSupportedGraphicsDevice(GraphicsDeviceType deviceType)
+    {
+        switch(deviceType)
+        {
+#ifdef UNITY_WIN
+        case GraphicsDeviceType::GRAPHICS_DEVICE_D3D11:
+        case GraphicsDeviceType::GRAPHICS_DEVICE_D3D12:
+        // case GraphicsDeviceType::GRAPHICS_DEVICE_VULKAN:
+            return true;
+#endif
+#ifdef UNITY_LINUX
+        case GraphicsDeviceType::GRAPHICS_DEVICE_OPENGL:
+        // case UnityGfxRenderer::GRAPHICS_DEVICE_VULKAN:
+            return true;
+#endif
+        }
+        return false;
     }
 } // end namespace webrtc
 } // end namespace unity

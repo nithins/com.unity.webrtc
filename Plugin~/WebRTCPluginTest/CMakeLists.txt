@@ -27,6 +27,12 @@ if(MSVC)
         ../WebRTCPlugin/GraphicsDevice/D3D11/*.cpp
         ../WebRTCPlugin/GraphicsDevice/D3D12/*.h
         ../WebRTCPlugin/GraphicsDevice/D3D12/*.cpp
+        ../WebRTCPlugin/GraphicsDevice/OpenGL/*.h
+        ../WebRTCPlugin/GraphicsDevice/OpenGL/*.cpp
+        ../WebRTCPlugin/GraphicsDevice/Vulkan/*.h
+        ../WebRTCPlugin/GraphicsDevice/Vulkan/*.cpp
+        ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.h
+        ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.cpp
         ../WebRTCPlugin/Codec/SoftwareCodec/*.h
         ../WebRTCPlugin/Codec/SoftwareCodec/*.cpp
         ../WebRTCPlugin/Codec/NvCodec/*.cpp
@@ -83,6 +89,8 @@ find_package(GMock REQUIRED)
 include(GoogleTest)
 
 if(MSVC)
+  find_package(GLUT REQUIRED)
+
   # Use precompiled header
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yu /Yupch.h")
 
@@ -94,11 +102,15 @@ if(MSVC)
   target_link_libraries(WebRTCPluginTest
       PRIVATE
       ${WEBRTC_LIBRARIES}
+      ${OPENGL_LIBRARIES}
+      ${GLUT_LIBRARY} 
       ${Vulkan_LIBRARY}
       ${CUDA_CUDA_LIBRARY}
       ${GTEST_MAIN_LIBRARIES}
       ${GTEST_LIBRARIES}
       ${GMOCK_LIBRARIES}
+      ${GLEW_LIBRARIES}
+      ${NVCODEC_LIBRARIES}
       d3d11
       d3d12
       dxgi
@@ -107,12 +119,12 @@ if(MSVC)
       Msdmo
       Dmoguids
       wmcodecdspuuid
-      ${NVCODEC_LIBRARIES}
   )
   target_include_directories(WebRTCPluginTest
     PRIVATE
       ${CUDA_INCLUDE_DIRS}
       ${Vulkan_INCLUDE_DIR}
+      ${GLEW_INCLUDE_DIR}
   )    
   set_target_properties( WebRTCPluginTest 
     PROPERTIES LINK_FLAGS 

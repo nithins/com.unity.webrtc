@@ -78,11 +78,9 @@
 #include "IUnityGraphicsD3D12.h"
 #endif
 
-#if defined(SUPPORT_OPENGL_CORE)
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
 #define GL_GLEXT_PROTOTYPES
 #include <GL/glew.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
 #endif
 
 #if defined(SUPPORT_METAL)
@@ -116,7 +114,7 @@ namespace webrtc
 #define CoTaskMemFree(p) free(p)
 #endif
 
-#if defined(SUPPORT_OPENGL_CORE)
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
     void OnOpenGLDebugMessage( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 #endif
     template<class ... Args>

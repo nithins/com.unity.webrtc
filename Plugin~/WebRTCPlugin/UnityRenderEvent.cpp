@@ -20,7 +20,6 @@ namespace webrtc
     IUnityInterfaces* s_UnityInterfaces = nullptr;
     IUnityGraphics* s_Graphics = nullptr;
     Context* s_context = nullptr;
-    IGraphicsDevice* s_device;
     std::map<const ::webrtc::MediaStreamTrackInterface*, std::unique_ptr<IEncoder>> s_mapEncoder;
 
 } // end namespace webrtc
@@ -84,13 +83,13 @@ static void UNITY_INTERFACE_API OnRenderEvent(int eventID, void* data)
             {
                 GraphicsDevice::GetInstance().Init(s_UnityInterfaces);
             }
-            s_device = GraphicsDevice::GetInstance().GetDevice();
             const VideoEncoderParameter* param = s_context->GetEncoderParameter(track);
             const UnityEncoderType encoderType = s_context->GetEncoderType();
-            s_mapEncoder[track] = EncoderFactory::GetInstance().Init(param->width, param->height, s_device, encoderType);
+            IGraphicsDevice* device = GraphicsDevice::GetInstance().GetDevice();
+            s_mapEncoder[track] = EncoderFactory::GetInstance().Init(param->width, param->height, device, encoderType);
             if (!s_context->InitializeEncoder(s_mapEncoder[track].get(), track))
             {
-                LogPrint("Encoder initialization faild.");
+                LogPrint("Encoder initialization failed.");
             }
             return;
         }

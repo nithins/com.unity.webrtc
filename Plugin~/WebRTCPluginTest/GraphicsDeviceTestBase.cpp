@@ -9,11 +9,14 @@
 #include <wrl/client.h>
 #include "../WebRTCPlugin/GraphicsDevice/D3D12/D3D12GraphicsDevice.h"
 
-#elif defined(SUPPORT_METAL)  // Metal
+#endif
+
+#if defined(SUPPORT_METAL)  // Metal
 #import <Metal/Metal.h>
 #include <DummyUnityInterface/DummyUnityGraphicsMetal.h>
+#endif
 
-#else // OpenGL
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED) // OpenGL
 
 #include <GL/glut.h>
 
@@ -114,24 +117,13 @@ void* CreateDeviceD3D12()
     return pD3D12Device.Get();
 }
 
-void* CreateDevice(UnityGfxRenderer renderer)
-{
-    switch (renderer)
-    {
-    case kUnityGfxRendererD3D11:
-        return CreateDeviceD3D11();
-    case kUnityGfxRendererD3D12:
-        return CreateDeviceD3D12();
-    }
-}
-
 IUnityInterface* CreateUnityInterface() {
     return nullptr;
 }
+#endif
+#if defined(SUPPORT_METAL)  // Metal
 
-#elif defined(SUPPORT_METAL)  // Metal
-
-void* CreateDevice(UnityGfxRenderer renderer)
+void* CreateDeviceMetal(UnityGfxRenderer renderer)
 {
     return MTLCreateSystemDefaultDevice();
 }
@@ -139,12 +131,13 @@ void* CreateDevice(UnityGfxRenderer renderer)
 IUnityInterface* CreateUnityInterface() {
     return new DummyUnityGraphicsMetal();
 }
+#endif
 
-#else // OpenGL
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED) // OpenGL
 
 static bool s_glutInitialized;
 
-void* CreateDevice(UnityGfxRenderer renderer)
+void* CreateDeviceOpenGL()
 {
     if (!s_glutInitialized)
     {
@@ -156,12 +149,32 @@ void* CreateDevice(UnityGfxRenderer renderer)
     }
     return nullptr;
 }
-
-IUnityInterface* CreateUnityInterface() {
-    return nullptr;
-}
-
 #endif
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void* CreateDevice(UnityGfxRenderer renderer)
+{
+    switch (renderer)
+    {
+#if defined(SUPPORT_D3D11)
+    case kUnityGfxRendererD3D11:
+        return CreateDeviceD3D11();
+#endif
+#if defined(SUPPORT_D3D12)
+    case kUnityGfxRendererD3D12:
+        return CreateDeviceD3D12();
+#endif
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
+    case kUnityGfxRendererOpenGLCore:
+        return CreateDeviceOpenGL();
+#endif
+#if defined(SUPPORT_METAL)
+    case kUnityGfxRendererMetal:
+        return CreateDeviceMetal();
+#endif
+    }
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 

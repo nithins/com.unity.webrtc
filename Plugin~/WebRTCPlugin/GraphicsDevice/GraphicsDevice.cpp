@@ -7,7 +7,7 @@
 #include "D3D12/D3D12GraphicsDevice.h" 
 #endif
 
-#if defined(SUPPORT_OPENGL_CORE)
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
 #include "OpenGL/OpenGLGraphicsDevice.h"
 #endif
 
@@ -92,7 +92,7 @@ bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, IUn
         break;
     }
     case kUnityGfxRendererOpenGLCore: {
-#if defined(SUPPORT_OPENGL_CORE)
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
         m_device = new OpenGLGraphicsDevice();
 #endif
         break;

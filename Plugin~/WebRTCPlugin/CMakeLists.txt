@@ -14,6 +14,8 @@ file(GLOB sources
 
 if(MSVC)
   file(GLOB append_source
+    GraphicsDevice/OpenGL/*.h
+    GraphicsDevice/OpenGL/*.cpp
     GraphicsDevice/Vulkan/*.h
     GraphicsDevice/Vulkan/*.cpp
     GraphicsDevice/Vulkan/Cuda/*.h
@@ -94,20 +96,23 @@ if(MSVC)
   target_link_libraries(webrtc
     PRIVATE
       ${WEBRTC_LIBRARIES}
+      ${OPENGL_LIBRARIES}
       ${Vulkan_LIBRARY}
       ${CUDA_CUDA_LIBRARY}
+      ${GLEW_LIBRARIES}
+      ${NVCODEC_LIBRARIES}
       d3d11
       winmm
       Secur32
       Msdmo
       Dmoguids
       wmcodecdspuuid
-      ${NVCODEC_LIBRARIES}
   )
   target_include_directories( webrtc
     PRIVATE
       ${CUDA_INCLUDE_DIRS}
       ${Vulkan_INCLUDE_DIR}
+      ${GLEW_INCLUDE_DIR}
   )
 
   # Set linker option
