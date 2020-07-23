@@ -19,7 +19,7 @@ curl -L %GLEW_DOWNLOAD_URL% > glew.zip
 
 echo -------------------
 echo Download GLUT
-curl -L $GLUT_DOWNLOAD_URL > glut.tar.gz
+curl -L %GLUT_DOWNLOAD_URL% > glut.tar.gz
 7z x glut.tar.gz
 7z x -aoa glut.tar -o%SOLUTION_DIR%
 ren freeglut-3.2.1 glut
