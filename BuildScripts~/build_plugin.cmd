@@ -63,7 +63,7 @@ cmake --build build64 --config Release
 
 echo -------------------
 echo Copy freeglut.dll 
-copy %SOLUTION_DIR%\bin\Release\freeglut.dll %SOLUTION_DIR%\build64\WebRTCPluginTest\Release\
+copy %SOLUTION_DIR%\glut\bin\Release\freeglut.dll %SOLUTION_DIR%\build64\WebRTCPluginTest\Release
 
 echo -------------------
 echo Test com.unity.webrtc Plugin 
