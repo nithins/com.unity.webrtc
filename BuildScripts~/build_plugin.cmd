@@ -50,7 +50,7 @@ echo -------------------
 echo Build GLUT
 
 cd %SOLUTION_DIR%\glut
-cmake -DFREEGLUT_BUILD_DEMOS=OFF .
+cmake -DFREEGLUT_BUILD_DEMOS=OFF . -G "Visual Studio 15 2017" -A x64
 cmake --build . --config Release
 xcopy /e lib\Release lib
 
