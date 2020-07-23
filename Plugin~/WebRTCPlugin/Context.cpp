@@ -2,7 +2,6 @@
 #include "WebRTCPlugin.h"
 #include "Context.h"
 
-#include "NvEncoder.h"
 #include "DummyVideoEncoder.h"
 #include "VideoCaptureTrackSource.h"
 #include "MediaStreamObserver.h"

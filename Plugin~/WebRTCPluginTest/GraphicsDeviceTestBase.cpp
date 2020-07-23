@@ -123,7 +123,7 @@ IUnityInterface* CreateUnityInterface() {
 #endif
 #if defined(SUPPORT_METAL)  // Metal
 
-void* CreateDeviceMetal(UnityGfxRenderer renderer)
+void* CreateDeviceMetal()
 {
     return MTLCreateSystemDefaultDevice();
 }

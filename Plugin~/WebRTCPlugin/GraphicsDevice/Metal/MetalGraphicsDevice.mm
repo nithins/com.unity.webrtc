@@ -30,6 +30,11 @@ namespace webrtc
     void MetalGraphicsDevice::ShutdownV() {
     }
 
+    ITexture2D* MetalGraphicsDevice::CreateTextureV(uint32_t width, uint32_t height, void* tex)
+    {
+        return CreateDefaultTextureFromNativeV(width, height, tex);
+    }
+
 //---------------------------------------------------------------------------------------------------------------------
     ITexture2D* MetalGraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
         MTLTextureDescriptor *textureDescriptor = [[MTLTextureDescriptor alloc] init];
