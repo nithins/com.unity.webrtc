@@ -20,12 +20,10 @@ OpenGLGraphicsDevice::~OpenGLGraphicsDevice() {
 //---------------------------------------------------------------------------------------------------------------------
 bool OpenGLGraphicsDevice::InitV()
 {
-#if defined(UNITY_WIN)
     glewExperimental = GL_TRUE;
     const GLenum err = glewInit();
     if (err != GLEW_OK)
         return false;
-#endif
 #if _DEBUG
     GLuint unusedIds = 0;
     glEnable(GL_DEBUG_OUTPUT);
@@ -45,7 +43,7 @@ void OpenGLGraphicsDevice::ShutdownV() {
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* OpenGLGraphicsDevice::CreateTextureV(uint32_t width, uint32_t height, void* tex)
 {
-    return new OpenGLTexture2D(width, height, reinterpret_cast<GLuint>(tex));
+    return new OpenGLTexture2D(width, height, reinterpret_cast<uintptr_t>(tex));
 }
 //---------------------------------------------------------------------------------------------------------------------
 ITexture2D* OpenGLGraphicsDevice::CreateDefaultTextureV(uint32_t w, uint32_t h) {
@@ -68,8 +66,8 @@ ITexture2D* OpenGLGraphicsDevice::CreateCPUReadTextureV(uint32_t w, uint32_t h)
 
 //---------------------------------------------------------------------------------------------------------------------
 bool OpenGLGraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
-    const GLuint dstName = reinterpret_cast<GLuint>(dest->GetNativeTexturePtrV());
-    const GLuint srcName = reinterpret_cast<GLuint>(src->GetNativeTexturePtrV());
+    const GLuint dstName = reinterpret_cast<uintptr_t>(dest->GetNativeTexturePtrV());
+    const GLuint srcName = reinterpret_cast<uintptr_t>(src->GetNativeTexturePtrV());
     const uint32_t width = dest->GetWidth();
     const uint32_t height  = dest->GetHeight();
     return CopyResource(dstName, srcName, width, height);
@@ -78,11 +76,11 @@ bool OpenGLGraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
 
 //---------------------------------------------------------------------------------------------------------------------
 bool OpenGLGraphicsDevice::CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) {
-    const GLuint dstName = reinterpret_cast<GLuint>(dest->GetNativeTexturePtrV());
+    const GLuint dstName = reinterpret_cast<uintptr_t>(dest->GetNativeTexturePtrV());
     const uint32_t width = dest->GetWidth();
     const uint32_t height  = dest->GetHeight();
 
-    GLuint srcName = (GLuint)(nativeTexturePtr);
+    GLuint srcName = reinterpret_cast<uintptr_t>(nativeTexturePtr);
     return CopyResource(dstName, srcName, width, height);
 }
 
@@ -112,7 +110,7 @@ bool OpenGLGraphicsDevice::CopyResource(GLuint dstName, GLuint srcName, uint32 w
 rtc::scoped_refptr<webrtc::I420Buffer> OpenGLGraphicsDevice::ConvertRGBToI420(ITexture2D* tex)
 {
     OpenGLTexture2D* sourceTex = static_cast<OpenGLTexture2D*>(tex);
-    const GLuint sourceId = reinterpret_cast<GLuint>(tex->GetNativeTexturePtrV());
+    const GLuint sourceId = reinterpret_cast<uintptr_t>(tex->GetNativeTexturePtrV());
     const GLuint pbo = sourceTex->GetPBO();
 
     // Send normal texture data to the PBO
