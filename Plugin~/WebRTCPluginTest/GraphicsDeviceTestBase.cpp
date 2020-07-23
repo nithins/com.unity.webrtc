@@ -148,6 +148,10 @@ void* CreateDeviceOpenGL()
     }
     return nullptr;
 }
+
+IUnityInterface* CreateUnityInterface() {
+    return nullptr;
+}
 #endif
 
 //---------------------------------------------------------------------------------------------------------------------
