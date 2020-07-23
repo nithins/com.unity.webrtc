@@ -62,8 +62,9 @@ cmake . -G "Visual Studio 15 2017" -A x64 -B "build64"
 cmake --build build64 --config Release
 
 echo -------------------
-echo Copy freeglut.dll 
+echo Copy libraries
 copy %SOLUTION_DIR%\glut\bin\Release\freeglut.dll %SOLUTION_DIR%\build64\WebRTCPluginTest\Release
+copy %SOLUTION_DIR%\glew\bin\Release\x64\glew32.dll %SOLUTION_DIR%\build64\WebRTCPluginTest\Release
 
 echo -------------------
 echo Test com.unity.webrtc Plugin 
