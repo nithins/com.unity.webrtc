@@ -18,6 +18,7 @@ namespace webrtc
         virtual void ShutdownV() override;
         inline virtual void* GetEncodeDevicePtrV() override;
 
+        virtual ITexture2D* CreateTextureV(uint32_t width, uint32_t height, void* tex) override;
         virtual ITexture2D* CreateDefaultTextureV(uint32_t w, uint32_t h) override;
         virtual ITexture2D* CreateDefaultTextureFromNativeV(uint32_t w, uint32_t h, void* nativeTexturePtr);
         virtual ITexture2D* CreateCPUReadTextureV(uint32_t width, uint32_t height) override;
