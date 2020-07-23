@@ -9,9 +9,10 @@ curl -L $LIBWEBRTC_DOWNLOAD_URL > webrtc.zip
 unzip -d $SOLUTION_DIR/webrtc webrtc.zip 
 
 # Download GLEW 
+cd $SOLUTION_DIR
 curl -L $GLEW_DOWNLOAD_URL > glew.zip
 unzip -d $SOLUTION_DIR glew.zip 
-mv $SOLUTION_DIR/glew-2.1.0 $SOLUTION_DIR/glew
+mv glew-2.1.0 glew
 
 # Install libc++, libc++abi googletest clang glut
 # TODO:: Remove this install process from here and recreate an image to build the plugin.
@@ -28,6 +29,10 @@ sudo cmake -Dcxx_no_rtti=ON \
 sudo make
 sudo cp googlemock/*.a "/usr/lib"
 sudo cp googlemock/gtest/*.a "/usr/lib"
+
+# Install glew
+cd $SOLUTION_DIR/glew
+make glew.lib
 
 # Build UnityRenderStreaming Plugin 
 cd "$SOLUTION_DIR"

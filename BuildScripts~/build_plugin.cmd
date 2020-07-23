@@ -14,11 +14,15 @@ curl -L %LIBWEBRTC_DOWNLOAD_URL% > webrtc.zip
 echo -------------------
 echo Download GLEW
 
+cd %SOLUTION_DIR%
 curl -L %GLEW_DOWNLOAD_URL% > glew.zip
 7z x -aoa glew.zip -o%SOLUTION_DIR%\glew
+ren glew-2.1.0 glew
 
 echo -------------------
 echo Download GLUT
+
+cd %SOLUTION_DIR%
 curl -L %GLUT_DOWNLOAD_URL% > glut.tar.gz
 7z x glut.tar.gz
 7z x -aoa glut.tar -o%SOLUTION_DIR%
