@@ -117,9 +117,6 @@ void* CreateDeviceD3D12()
     return pD3D12Device.Get();
 }
 
-IUnityInterface* CreateUnityInterface() {
-    return nullptr;
-}
 #endif
 #if defined(SUPPORT_METAL)  // Metal
 
@@ -128,9 +125,6 @@ void* CreateDeviceMetal()
     return MTLCreateSystemDefaultDevice();
 }
 
-IUnityInterface* CreateUnityInterface() {
-    return new DummyUnityGraphicsMetal();
-}
 #endif
 
 #if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED) // OpenGL
@@ -149,10 +143,33 @@ void* CreateDeviceOpenGL()
     return nullptr;
 }
 
-IUnityInterface* CreateUnityInterface() {
+#endif
+
+IUnityInterface* CreateUnityInterface(UnityGfxRenderer renderer) {
+
+    switch(renderer)
+    {
+#if defined(SUPPORT_D3D11)
+    case kUnityGfxRendererD3D11:
+        return nullptr;
+#endif
+#if defined(SUPPORT_D3D12)
+    case kUnityGfxRendererD3D12:
+        return nullptr;
+#endif
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
+    case kUnityGfxRendererOpenGLCore:
+    case kUnityGfxRendererOpenGLES20:
+    case kUnityGfxRendererOpenGLES30:
+        return nullptr;
+#endif
+#if defined(SUPPORT_METAL)  // Metal
+    case kUnityGfxRendererMetal:
+        return new DummyUnityGraphicsMetal();
+#endif
+    }
     return nullptr;
 }
-#endif
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -185,7 +202,7 @@ void GraphicsDeviceTestBase::SetUp()
 {
     std::tie(m_unityGfxRenderer, m_encoderType) = GetParam();
     const auto pGraphicsDevice = CreateDevice(m_unityGfxRenderer);
-    const auto unityInterface = CreateUnityInterface();
+    const auto unityInterface = CreateUnityInterface(m_unityGfxRenderer);
 
     if (m_unityGfxRenderer == kUnityGfxRendererD3D12)
     {
