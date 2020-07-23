@@ -18,6 +18,7 @@ cd %SOLUTION_DIR%
 curl -L %GLEW_DOWNLOAD_URL% > glew.zip
 7z x -aoa glew.zip -o%SOLUTION_DIR%\glew
 ren glew-2.1.0 glew
+xcopy /e glew\lib\Release\x64 glew\lib
 
 echo -------------------
 echo Download GLUT
