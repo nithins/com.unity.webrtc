@@ -66,7 +66,7 @@ prepack_{{ package.name }}_{{ platform.name }}:
         - {{ platform.plugin_path }}
     {{ platform.name }}_plugintest:
       paths:
-        - Plugin~/build64/WebRTCPluginTest/Release        
+        - "Plugin~/build64/WebRTCPluginTest/Release/*"
 {% endfor %}
 
 pack_{{ package.name }}:
