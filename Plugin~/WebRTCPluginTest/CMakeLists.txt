@@ -97,6 +97,7 @@ if(MSVC)
       PRIVATE
         WEBRTC_WIN
         NOMINMAX
+        GLEW_STATIC
   )
   target_link_libraries(WebRTCPluginTest
       PRIVATE
@@ -108,7 +109,7 @@ if(MSVC)
       ${GTEST_MAIN_LIBRARIES}
       ${GTEST_LIBRARIES}
       ${GMOCK_LIBRARIES}
-      ${GLEW_LIBRARIES}
+      ${GLEW_STATIC_LIBRARIES}
       ${NVCODEC_LIBRARIES}
       d3d11
       d3d12
@@ -176,7 +177,7 @@ elseif(UNIX)
       ${CMAKE_THREAD_LIBS_INIT}
       ${Vulkan_LIBRARY}
       ${NVCODEC_LIBRARIES}
-      ${GLEW_LIBRARIES}
+      ${GLEW_STATIC_LIBRARIES}
       cuda
   )
   target_include_directories(WebRTCPluginTest

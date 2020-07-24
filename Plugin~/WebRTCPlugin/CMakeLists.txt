@@ -92,6 +92,7 @@ if(MSVC)
     PRIVATE
       WEBRTC_WIN
       NOMINMAX
+      GLEW_STATIC
   )
   target_link_libraries(webrtc
     PRIVATE
@@ -99,7 +100,7 @@ if(MSVC)
       ${OPENGL_LIBRARIES}
       ${Vulkan_LIBRARY}
       ${CUDA_CUDA_LIBRARY}
-      ${GLEW_LIBRARIES}
+      ${GLEW_STATIC_LIBRARIES}
       ${NVCODEC_LIBRARIES}
       d3d11
       winmm
@@ -118,7 +119,7 @@ if(MSVC)
   # Set linker option
   set_target_properties( webrtc 
     PROPERTIES LINK_FLAGS 
-      "/DEBUG /SUBSYSTEM:WINDOWS /DELAYLOAD:nvcuda.dll /DELAYLOAD:vulkan-1.dll"
+      "/SUBSYSTEM:WINDOWS /DELAYLOAD:nvcuda.dll /DELAYLOAD:vulkan-1.dll /DELAYLOAD:nvEncodeAPI64.dll"
   )
 
   # Change output directory for shared library
@@ -176,7 +177,7 @@ elseif(UNIX)
       ${OPENGL_opengl_LIBRARY}
       ${Vulkan_LIBRARY}
       ${NVCODEC_LIBRARIES}
-      ${GLEW_LIBRARIES}
+      ${GLEW_STATIC_LIBRARIES}
       cuda
   )
   target_include_directories(webrtc
