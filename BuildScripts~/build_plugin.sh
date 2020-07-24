@@ -32,7 +32,9 @@ sudo cp googlemock/gtest/*.a "/usr/lib"
 
 # Install glew
 cd $SOLUTION_DIR/glew
-make glew.lib
+make glew.lib.static
+sudo make install
+make clean
 
 # Build UnityRenderStreaming Plugin 
 cd "$SOLUTION_DIR"
