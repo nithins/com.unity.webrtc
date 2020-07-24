@@ -67,9 +67,9 @@ prepack_{{ package.name }}_{{ platform.name }}:
     {{ platform.name }}_plugin:
       paths:
         - {{ platform.plugin_path }}
-    {{ platform.name }}_plugintest:
-      paths:
-        - {{ platform.plugintest_path }}
+#    {{ platform.name }}_plugintest:
+#      paths:
+#        - {{ platform.plugintest_path }}
 {% endfor %}
 
 pack_{{ package.name }}:
