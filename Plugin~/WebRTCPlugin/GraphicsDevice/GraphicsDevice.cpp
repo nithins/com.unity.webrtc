@@ -99,7 +99,7 @@ bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, IUn
     }
 #if defined(SUPPORT_VULKAN)
     case kUnityGfxRendererVulkan: {
-        const UnityVulkanInstance* vulkan = reinterpret_cast<const UnityVulkanInstance*>(device);
+        const UnityVulkanInstance* vulkan = static_cast<const UnityVulkanInstance*>(device);
         m_device = new VulkanGraphicsDevice(
             reinterpret_cast<IUnityGraphicsVulkan*>(unityInterface),
             vulkan->instance,

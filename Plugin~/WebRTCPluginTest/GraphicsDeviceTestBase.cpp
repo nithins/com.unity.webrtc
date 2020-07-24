@@ -36,7 +36,7 @@ Microsoft::WRL::ComPtr<ID3D11DeviceContext> pD3D11DeviceContext;
 
 Microsoft::WRL::ComPtr<IDXGIAdapter1> pAdapter1;
 Microsoft::WRL::ComPtr<IDXGIFactory4> pFactory4;
-Microsoft::WRL::ComPtr<ID3D12Device5> pD3D12Device;
+Microsoft::WRL::ComPtr<ID3D12Device> pD3D12Device;
 Microsoft::WRL::ComPtr<ID3D12CommandQueue> pCommandQueue;
 
 const int kD3D12NodeMask = 0;
@@ -45,7 +45,7 @@ const int kD3D12NodeMask = 0;
 
 void* CreateDeviceD3D11()
 {
-    auto hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void **>(pFactory.GetAddressOf()));
+    auto hr = CreateDXGIFactory1(IID_PPV_ARGS(&pFactory));
     EXPECT_TRUE(SUCCEEDED(hr));
     EXPECT_NE(nullptr, pFactory.Get());
 
@@ -83,7 +83,7 @@ void GetHardwareAdapter(IDXGIFactory2* pFactory, IDXGIAdapter1** ppAdapter)
 
         // Check to see if the adapter supports Direct3D 12, but don't create the
         // actual device yet.
-        if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+        if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), nullptr)))
         {
             break;
         }
@@ -93,7 +93,7 @@ void GetHardwareAdapter(IDXGIFactory2* pFactory, IDXGIAdapter1** ppAdapter)
 
 void* CreateDeviceD3D12()
 {
-    auto hr = CreateDXGIFactory1(IID_PPV_ARGS(&pFactory4));
+    auto hr = CreateDXGIFactory2(0, IID_PPV_ARGS(&pFactory4));
     EXPECT_TRUE(SUCCEEDED(hr));
     EXPECT_NE(nullptr, pFactory4.Get());
 
@@ -101,10 +101,14 @@ void* CreateDeviceD3D12()
     EXPECT_NE(nullptr, pAdapter1.Get());
 
     hr = D3D12CreateDevice(
-        pAdapter1.Get(), D3D_FEATURE_LEVEL_11_1, IID_PPV_ARGS(&pD3D12Device));
+        pAdapter1.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&pD3D12Device));
     EXPECT_TRUE(SUCCEEDED(hr));
     EXPECT_NE(nullptr, pD3D12Device.Get());
 
+    D3D12_FEATURE_DATA_D3D12_OPTIONS3 options = {};
+    hr = pD3D12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options, sizeof(options));
+    EXPECT_TRUE(SUCCEEDED(hr));
+    EXPECT_TRUE(options.WriteBufferImmediateSupportFlags & (1 << D3D12_COMMAND_LIST_TYPE_DIRECT));
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_DISABLE_GPU_TIMEOUT;
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
