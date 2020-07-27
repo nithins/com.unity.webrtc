@@ -528,7 +528,7 @@ namespace Unity.WebRTC
         [DllImport(WebRTC.Lib)]
         public static extern void RegisterDebugLog(DelegateDebugLog func);
         [DllImport(WebRTC.Lib)]
-        public static extern IntPtr ContextCreate(int uid, EncoderType encoderType);
+        public static extern IntPtr ContextCreate(int uid, EncoderType encoderType, GraphicsDeviceType gfxRenderer);
         [DllImport(WebRTC.Lib)]
         public static extern void ContextDestroy(int uid);
         [DllImport(WebRTC.Lib)]

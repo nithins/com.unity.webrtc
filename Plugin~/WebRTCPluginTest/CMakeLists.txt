@@ -66,6 +66,10 @@ elseif(UNIX)
         ../WebRTCPlugin/Codec/NvCodec/Util.h
         ../WebRTCPlugin/Codec/NvCodec/NvEncoderProxy.cpp
         ../WebRTCPlugin/Codec/NvCodec/NvEncoderProxy.h
+        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCudaWithCUarray.cpp
+        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCudaWithCUarray.h
+        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCudaUtil.cpp
+        ../WebRTCPlugin/Codec/NvCodec/NvEncoderCudaUtil.h
     )
     list (APPEND sources ${append_source})
 endif()

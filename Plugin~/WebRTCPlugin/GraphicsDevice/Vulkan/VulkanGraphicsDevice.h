@@ -27,6 +27,7 @@ public:
 
     virtual bool CopyResourceV(ITexture2D* dest, ITexture2D* src) override;
     virtual bool CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) override;
+    virtual bool CopyTextureV(const NvEncInputFrame* dst, ITexture2D* src) override { return true;  }
     inline virtual GraphicsDeviceType GetDeviceType() const override;
     virtual rtc::scoped_refptr<webrtc::I420Buffer> ConvertRGBToI420(ITexture2D* tex) override;
 private:

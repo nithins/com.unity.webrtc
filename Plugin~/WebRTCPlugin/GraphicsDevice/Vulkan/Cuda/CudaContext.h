@@ -13,6 +13,8 @@ public:
     CudaContext();
     ~CudaContext() = default;
 
+    CUresult Init();
+    CUresult InitGL();
     CUresult Init(const VkInstance instance, VkPhysicalDevice physicalDevice);
     void Shutdown();
     inline CUcontext GetContext() const;

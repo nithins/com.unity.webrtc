@@ -25,7 +25,8 @@ protected:
         encoder_ = EncoderFactory::GetInstance().Init(width, height, m_device, m_encoderType);
         EXPECT_NE(nullptr, encoder_);
 
-        context = std::make_unique<Context>();
+        std::tie(m_unityGfxRenderer, m_encoderType) = GetParam();
+        context = std::make_unique<Context>(1, UnityEncoderHardware, m_unityGfxRenderer);
     }
     void TearDown() override {
         GraphicsDeviceTestBase::TearDown();

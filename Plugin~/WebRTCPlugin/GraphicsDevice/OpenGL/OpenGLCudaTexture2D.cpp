@@ -1,5 +1,7 @@
 #include "pch.h"
-#include "OpenGLTexture2D.h"
+#include "OpenGLCudaTexture2D.h"
+
+#include <cuda.h>
 
 namespace unity
 {
@@ -8,38 +10,44 @@ namespace webrtc
 
 //---------------------------------------------------------------------------------------------------------------------
 
-OpenGLTexture2D::OpenGLTexture2D(uint32_t w, uint32_t h, GLuint tex) : ITexture2D(w,h)
-    , m_texture(tex)
+OpenGLCudaTexture2D::OpenGLCudaTexture2D(
+    uint32_t width, uint32_t height, GLuint tex)
+    : ITexture2D(width,height) , m_texture(tex), m_pbo(0)
 {
 }
 
-OpenGLTexture2D::~OpenGLTexture2D()
+OpenGLCudaTexture2D::~OpenGLCudaTexture2D()
 {
-    glDeleteTextures(1, &m_texture);
-    m_texture = 0;
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_pbo);
-    glDeleteBuffers(1, &m_pbo);
-    m_pbo = 0;
-
-    free(m_buffer);
-    m_buffer = nullptr;
+    Shutdown();
 }
 
-void OpenGLTexture2D::CreatePBO()
+CUresult OpenGLCudaTexture2D::Init()
 {
-    glGenBuffers(1, &m_pbo);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+    m_pbo = CreatePBO();
+    return m_cudaImage.Init(m_pbo);
+}
+
+void OpenGLCudaTexture2D::Shutdown()
+{
+    m_cudaImage.Shutdown();
+}
+
+GLuint OpenGLCudaTexture2D::CreatePBO()
+{
+    GLuint pbo = 0;
+    glGenBuffers(1, &pbo);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
 
     const size_t bufferSize = GetBufferSize();
     glBufferData(GL_PIXEL_UNPACK_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    return pbo;
 
-    if(m_buffer != nullptr)
-    {
-        free(m_buffer);
-    }
-    m_buffer = static_cast<byte*>(malloc(bufferSize));
+    //if(m_buffer != nullptr)
+    //{
+    //    free(m_buffer);
+    //}
+    //m_buffer = static_cast<byte*>(malloc(bufferSize));
 }
 
 

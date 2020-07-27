@@ -1,4 +1,6 @@
 #pragma once
+#include <cuda.h>
+
 #include "Codec/IEncoder.h"
 #include "NvEncoder.h"
 #include "GraphicsDevice/GraphicsDeviceType.h"
@@ -36,6 +38,10 @@ namespace webrtc
         bool isIdrFrame = false;
         std::unique_ptr<NvEncoder> m_encoder;
         std::unique_ptr<webrtc::BitrateAdjuster> m_bitrateAdjuster;
+
+        GLuint m_pbo = 0;
+        CUgraphicsResource m_graphicsResource;
+        CUdeviceptr m_devicePtr;
     };
 } // end namespace webrtc
 } // end namespace unity

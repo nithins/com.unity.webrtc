@@ -68,6 +68,7 @@ namespace webrtc
 #ifdef UNITY_WIN
         case UnityGfxRenderer::kUnityGfxRendererD3D11:
         case UnityGfxRenderer::kUnityGfxRendererD3D12:
+        case UnityGfxRenderer::kUnityGfxRendererOpenGLCore:
         // case UnityGfxRenderer::kUnityGfxRendererVulkan:
             return true;
 #endif

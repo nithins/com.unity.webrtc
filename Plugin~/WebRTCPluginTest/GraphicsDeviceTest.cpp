@@ -22,6 +22,20 @@ TEST_P(GraphicsDeviceTest, CreateDefaultTextureV) {
     EXPECT_FALSE(tex->IsSize(0, 0));
 }
 
+/*
+TEST_P(GraphicsDeviceTest, CreateTextureV) {
+    const auto width = 256;
+    const auto height = 256;
+    const std::unique_ptr<ITexture2D> tex(m_device->CreateDefaultTextureV(width, height));
+    void* ptr = tex->GetNativeTexturePtrV();
+    const std::unique_ptr<ITexture2D> tex2(m_device->CreateTextureV(width, height, ptr));
+    EXPECT_TRUE(tex2->IsSize(width, height));
+    EXPECT_NE(nullptr, tex2->GetEncodeTexturePtrV());
+    EXPECT_NE(nullptr, tex2->GetNativeTexturePtrV());
+    EXPECT_FALSE(tex->IsSize(0, 0));
+}
+*/
+
 #if defined(SUPPORT_SOFTWARE_ENCODER)
 TEST_P(GraphicsDeviceTest, CreateCPUReadTextureV) {
     const auto width = 256;

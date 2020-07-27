@@ -13,7 +13,7 @@ namespace webrtc
     {
     public:
         static EncoderFactory& GetInstance();
-        static bool GetHardwareEncoderSupport();
+        static bool GetHardwareEncoderSupport(UnityGfxRenderer renderer);
         std::unique_ptr<IEncoder> Init(int width, int height, IGraphicsDevice* device, UnityEncoderType encoderType); //Can throw exception.
     private:
         EncoderFactory() = default;

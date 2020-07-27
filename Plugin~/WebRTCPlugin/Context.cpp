@@ -6,6 +6,7 @@
 #include "VideoCaptureTrackSource.h"
 #include "MediaStreamObserver.h"
 #include "SetSessionDescriptionObserver.h"
+#include "UnityRenderEvent.h"
 #include "UnityVideoEncoderFactory.h"
 #include "UnityVideoDecoderFactory.h"
 #include "Codec/EncoderFactory.h"
@@ -26,14 +27,14 @@ namespace webrtc
         return nullptr;
     }
 
-    Context* ContextManager::CreateContext(int uid, UnityEncoderType encoderType)
+    Context* ContextManager::CreateContext(int uid, UnityEncoderType encoderType, UnityGfxRenderer renderer)
     {
         auto it = s_instance.m_contexts.find(uid);
         if (it != s_instance.m_contexts.end()) {
             DebugLog("Using already created context with ID %d", uid);
             return nullptr;
         }
-        auto ctx = new Context(uid, encoderType);
+        auto ctx = new Context(uid, encoderType, renderer);
         s_instance.m_contexts[uid].reset(ctx);
         return ctx;
     }
@@ -134,7 +135,7 @@ namespace webrtc
     }
 #pragma warning(pop)
 
-    Context::Context(int uid, UnityEncoderType encoderType)
+    Context::Context(int uid, UnityEncoderType encoderType, UnityGfxRenderer renderer)
         : m_uid(uid)
         , m_encoderType(encoderType)
     {
@@ -154,7 +155,7 @@ namespace webrtc
 #else
         std::unique_ptr<webrtc::VideoEncoderFactory> videoEncoderFactory =
             m_encoderType == UnityEncoderType::UnityEncoderHardware &&
-            EncoderFactory::GetHardwareEncoderSupport() ?
+            EncoderFactory::GetHardwareEncoderSupport(renderer) ?
             std::make_unique<UnityVideoEncoderFactory>(static_cast<IVideoEncoderObserver*>(this)) : webrtc::CreateBuiltinVideoEncoderFactory();
 
         std::unique_ptr<webrtc::VideoDecoderFactory> videoDecoderFactory =

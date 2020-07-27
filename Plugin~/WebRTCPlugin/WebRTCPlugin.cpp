@@ -87,9 +87,9 @@ char* ConvertString(const std::string str)
 
 extern "C"
 {
-    UNITY_INTERFACE_EXPORT bool GetHardwareEncoderSupport()
+    UNITY_INTERFACE_EXPORT bool GetHardwareEncoderSupport(UnityGfxRenderer renderer)
     {
-        return EncoderFactory::GetHardwareEncoderSupport();
+        return EncoderFactory::GetHardwareEncoderSupport(renderer);
     }
 
     UNITY_INTERFACE_EXPORT UnityEncoderType ContextGetEncoderType(Context* context)
@@ -228,7 +228,8 @@ extern "C"
         delegateSetResolution = func;
     }
 
-    UNITY_INTERFACE_EXPORT Context* ContextCreate(int uid, UnityEncoderType encoderType)
+    UNITY_INTERFACE_EXPORT Context* ContextCreate(
+        int uid, UnityEncoderType encoderType, UnityGfxRenderer renderer)
     {
         auto ctx = ContextManager::GetInstance()->GetContext(uid);
         if (ctx != nullptr)
@@ -236,7 +237,7 @@ extern "C"
             DebugLog("Already created context with ID %d", uid);
             return ctx;
         }
-        ctx = ContextManager::GetInstance()->CreateContext(uid, encoderType);
+        ctx = ContextManager::GetInstance()->CreateContext(uid, encoderType, renderer);
         return ctx;
     }
 

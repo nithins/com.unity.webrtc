@@ -19,7 +19,7 @@ namespace webrtc
         static ContextManager* GetInstance() { return &s_instance; }
      
         Context* GetContext(int uid) const;
-        Context* CreateContext(int uid, UnityEncoderType encoderType);
+        Context* CreateContext(int uid, UnityEncoderType encoderType, UnityGfxRenderer renderer);
         void DestroyContext(int uid);
         void SetCurContext(Context*);
         using ContextPtr = std::unique_ptr<Context>;
@@ -41,7 +41,11 @@ namespace webrtc
     {
     public:
         
-        explicit Context(int uid = -1, UnityEncoderType encoderType = UnityEncoderHardware);
+        explicit Context(
+            int uid,
+            UnityEncoderType encoderType,
+            UnityGfxRenderer renderer
+        );
         ~Context();
 
         // Utility

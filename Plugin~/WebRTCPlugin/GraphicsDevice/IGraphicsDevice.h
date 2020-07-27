@@ -2,6 +2,8 @@
 
 #include "GraphicsDevice/GraphicsDeviceType.h"
 
+struct NvEncInputFrame;
+
 namespace unity
 {
 namespace webrtc
@@ -21,6 +23,7 @@ public:
     virtual void* GetEncodeDevicePtrV() = 0;
     virtual bool CopyResourceV(ITexture2D* dest, ITexture2D* src) = 0;
     virtual bool CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) = 0;
+    virtual bool CopyTextureV(const NvEncInputFrame* dst, ITexture2D* src  ) = 0;
     virtual GraphicsDeviceType GetDeviceType() const = 0;
 
     //Required for software encoding

@@ -20,18 +20,22 @@ public:
     CudaImage();
     ~CudaImage() = default;
     CUresult Init(const VkDevice device, const VulkanTexture2D* texture);
+    CUresult Init(GLuint texture);
     void Shutdown();
     inline CUarray GetArray() const;
-
+    inline CUdeviceptr GetDevicePtr() const;
 
 private:
     CUarray m_array;
+    CUdeviceptr m_devicePtr;
+    CUgraphicsResource m_graphicsResource;
     CUmipmappedArray m_mipmapArray;
     CUexternalMemory m_extMemory;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
     inline CUarray CudaImage::GetArray() const { return m_array; }
+    inline CUdeviceptr CudaImage::GetDevicePtr() const { return m_devicePtr; }
 
 } // end namespace webrtc
 } // end namespace unity

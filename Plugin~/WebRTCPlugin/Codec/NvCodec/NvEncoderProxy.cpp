@@ -3,8 +3,8 @@
 #include "Codec/NvCodec/Util.h"
 #include "GraphicsDevice/IGraphicsDevice.h"
 
-#if defined(SUPPORT_OPENGL_CORE)
-#include "NvEncoderGL.h"
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
+#include "NvEncoderCudaWithCUarray.h"
 #endif
 
 #if defined(SUPPORT_D3D11)
@@ -14,6 +14,8 @@
 #if defined(SUPPORT_D3D12)
 #include "NvEncoderD3D12.h"
 #endif
+#include <cudaGL.h>
+
 #include "NvEncoderCuda.h"
 #include "NvVideoCapturer.h"
 
@@ -49,8 +51,11 @@ namespace webrtc
         }
         case GraphicsDeviceType::GRAPHICS_DEVICE_OPENGL:
         {
-#if defined(SUPPORT_OPENGL_CORE)
-            m_encoder = std::make_unique<NvEncoderGL>(width, height, NV_ENC_BUFFER_FORMAT_ARGB, 0);
+#if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
+            CUcontext cuContext = static_cast<CUcontext>(
+                device->GetEncodeDevicePtrV());
+            m_encoder = std::make_unique<NvEncoderCuda>(
+                cuContext, width, height, NV_ENC_BUFFER_FORMAT_ARGB, 0);
             break;
 #endif
         }
@@ -167,7 +172,50 @@ namespace webrtc
     {
         UpdateSettings();
 
-        const NvEncInputFrame* inputFrame = m_encoder->GetNextInputFrame();
+        const NvEncInputFrame* dst = m_encoder->GetNextInputFrame();
+        if(m_pbo == 0)
+        {
+            glGenBuffers(1, &m_pbo);
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbo);
+
+            const size_t bufferSize = m_width * m_height * 4;
+            glBufferData(GL_PIXEL_UNPACK_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+            CUresult result = cuGraphicsGLRegisterBuffer(
+                &m_graphicsResource, m_pbo, CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD);
+            if (result != CUDA_SUCCESS) {
+                return false;
+            }
+            result = cuGraphicsMapResources(1, &m_graphicsResource, 0);
+            if (result != CUDA_SUCCESS) {
+                return false;
+            }
+            size_t nSize = 0;
+            result = cuGraphicsResourceGetMappedPointer(&m_devicePtr, &nSize, m_graphicsResource);
+            if (result != CUDA_SUCCESS) {
+                return false;
+            }
+        }
+        GLuint src = reinterpret_cast<intptr_t>(frame);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pbo);
+        glBindTexture(GL_TEXTURE_2D, src);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+        CUcontext context = static_cast<CUcontext>(m_device->GetEncodeDevicePtrV());
+
+        NvEncoderCuda::CopyToDeviceFrame(
+            context, (void*)m_devicePtr, 0, (CUdeviceptr)dst->inputPtr, dst->pitch, m_width, m_height,
+            CU_MEMORYTYPE_DEVICE, dst->bufferFormat, dst->chromaOffsets,
+            dst->numChromaPlanes);
+
+        //ITexture2D* src = m_device->CreateTextureV(m_width, m_height, frame);
+        //if(!m_device->CopyTextureV(dst, frame))
+        //{
+        //    return false;
+        //}
+        /*
         void* inputPtr = inputFrame->inputPtr;
 #if defined(SUPPORT_D3D12)
         if(m_deviceType == GraphicsDeviceType::GRAPHICS_DEVICE_D3D12)
@@ -178,7 +226,7 @@ namespace webrtc
 #endif
         ITexture2D* inputTex = m_device->CreateTextureV(m_width, m_height, inputPtr);
         m_device->CopyResourceFromNativeV(inputTex, frame);
-
+*/
 #pragma region start encoding
         NV_ENC_PIC_PARAMS picParams = {};
         if (isIdrFrame)

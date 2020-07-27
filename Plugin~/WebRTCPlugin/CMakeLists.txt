@@ -32,6 +32,10 @@ if(MSVC)
     Codec/NvCodec/Util.h
     Codec/NvCodec/NvEncoderProxy.cpp
     Codec/NvCodec/NvEncoderProxy.h
+    Codec/NvCodec/NvEncoderCudaWithCUarray.cpp
+    Codec/NvCodec/NvEncoderCudaWithCUarray.h
+    Codec/NvCodec/NvEncoderCudaUtil.cpp
+    Codec/NvCodec/NvEncoderCudaUtil.h
   )
   list (APPEND sources ${append_source})
 elseif(APPLE)
@@ -56,6 +60,10 @@ elseif(UNIX)
     Codec/NvCodec/Util.h
     Codec/NvCodec/NvEncoderProxy.cpp
     Codec/NvCodec/NvEncoderProxy.h
+    Codec/NvCodec/NvEncoderCudaWithCUarray.cpp
+    Codec/NvCodec/NvEncoderCudaWithCUarray.h
+    Codec/NvCodec/NvEncoderCudaUtil.cpp
+    Codec/NvCodec/NvEncoderCudaUtil.h
   )
   list (APPEND sources ${append_source})
 endif()

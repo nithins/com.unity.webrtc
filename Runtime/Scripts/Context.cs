@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEngine;
 
 namespace Unity.WebRTC
 {
@@ -14,7 +15,7 @@ namespace Unity.WebRTC
 
         public static Context Create(int id = 0, EncoderType encoderType = EncoderType.Hardware)
         {
-            var ptr = NativeMethods.ContextCreate(id, encoderType);
+            var ptr = NativeMethods.ContextCreate(id, encoderType, SystemInfo.graphicsDeviceType);
             return new Context(ptr, id);
         }
 

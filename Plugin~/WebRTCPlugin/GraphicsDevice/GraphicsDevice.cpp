@@ -9,6 +9,7 @@
 
 #if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
 #include "OpenGL/OpenGLGraphicsDevice.h"
+#include "OpenGL/OpenGLCudaGraphicsDevice.h"
 #endif
 
 #if defined(SUPPORT_VULKAN)
@@ -93,7 +94,8 @@ bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, IUn
     }
     case kUnityGfxRendererOpenGLCore: {
 #if defined(SUPPORT_OPENGL_CORE) || defined(SUPPORT_OPENGL_UNIFIED)
-        m_device = new OpenGLGraphicsDevice();
+//        m_device = new OpenGLGraphicsDevice();
+        m_device = new OpenGLCudaGraphicsDevice();
 #endif
         break;
     }

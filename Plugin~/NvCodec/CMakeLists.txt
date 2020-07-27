@@ -5,12 +5,14 @@ project(NvCodec)
 set(NVCODEC_DIR ${CMAKE_SOURCE_DIR}/NvCodec)
 set(NV_ENC_DIR ${NVCODEC_DIR}/NvEncoder)
 set(NV_DEC_DIR ${NVCODEC_DIR}/NvDecoder)
+set(NV_UTIL_DIR ${NVCODEC_DIR}/Utils)
 
 set(NVCODEC_INCLUDE_DIR
   ${NVCODEC_DIR}
   ${NVCODEC_DIR}/include
   ${NV_ENC_DIR}
   ${NV_DEC_DIR}
+  ${NV_UTIL_DIR}
   CACHE PATH
   "NVCODEC INCLUDE PATH"
   )
@@ -21,6 +23,8 @@ if(MSVC)
     ${NV_ENC_DIR}/*.cpp
     ${NV_DEC_DIR}/*.h
     ${NV_DEC_DIR}/*.cpp
+    ${NV_UTIL_DIR}/*.h
+    ${NV_UTIL_DIR}/*.cu
   )
 elseif(UNIX)
   file(GLOB sources
@@ -34,6 +38,8 @@ elseif(UNIX)
     ${NV_ENC_DIR}/NvEncoderOutputInVidMemCuda.h
     ${NV_DEC_DIR}/*.h
     ${NV_DEC_DIR}/*.cpp
+    ${NV_UTIL_DIR}/*.h
+    ${NV_UTIL_DIR}/*.cu
   )
 endif()
 

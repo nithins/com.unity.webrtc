@@ -22,12 +22,11 @@ namespace webrtc
         return factory;
     }
 
-    bool EncoderFactory::GetHardwareEncoderSupport()
+    bool EncoderFactory::GetHardwareEncoderSupport(UnityGfxRenderer renderer)
     {
 #if defined(UNITY_OSX)
         return false;
 #else
-        UnityGfxRenderer renderer = GetGfxRenderer();
         return IsSupportedGraphicsDevice(renderer);
 #endif
     }
@@ -40,8 +39,7 @@ namespace webrtc
         encoder = std::make_unique<SoftwareEncoder>(width, height, device);
 #else
         GraphicsDeviceType deviceType = device->GetDeviceType();
-        if (encoderType == UnityEncoderType::UnityEncoderHardware &&
-            GetHardwareEncoderSupport())
+        if (encoderType == UnityEncoderType::UnityEncoderHardware)
         {
             encoder = std::make_unique<NvEncoderProxy>(width, height, device, deviceType);
         }
