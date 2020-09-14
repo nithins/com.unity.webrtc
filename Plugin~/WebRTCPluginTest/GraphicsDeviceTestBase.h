@@ -1,7 +1,7 @@
 #pragma once
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "../WebRTCPlugin/GraphicsDevice/IGraphicsDevice.h"
+#include "GraphicsDevice/IGraphicsDevice.h"
 
 namespace unity
 {
@@ -30,8 +30,10 @@ static tuple<UnityGfxRenderer, UnityEncoderType> VALUES_TEST_ENV[] = {
     { kUnityGfxRendererD3D11, UnityEncoderType::UnityEncoderSoftware },
     { kUnityGfxRendererD3D12, UnityEncoderType::UnityEncoderHardware },
     { kUnityGfxRendererD3D12, UnityEncoderType::UnityEncoderSoftware }
-//    { kUnityGfxRendererVulkan, UnityEncoderType::UnityEncoderHardware },
-//    { kUnityGfxRendererVulkan, UnityEncoderType::UnityEncoderSoftware }
+    //{ kUnityGfxRendererVulkan, UnityEncoderType::UnityEncoderHardware },
+    //{ kUnityGfxRendererVulkan, UnityEncoderType::UnityEncoderSoftware },
+    //{ kUnityGfxRendererOpenGLCore, UnityEncoderType::UnityEncoderHardware },
+    //{ kUnityGfxRendererOpenGLCore, UnityEncoderType::UnityEncoderSoftware }
 #elif defined(UNITY_OSX)
     { kUnityGfxRendererMetal, UnityEncoderType::UnityEncoderSoftware }
 #elif defined(UNITY_LINUX)

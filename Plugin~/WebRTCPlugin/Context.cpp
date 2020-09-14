@@ -1,17 +1,16 @@
 #include "pch.h"
 #include "WebRTCPlugin.h"
 #include "Context.h"
-
-#if !defined(UNITY_OSX)
-#include "Codec/NvCodec/NvEncoder.h"
-#endif
-
-#include "DummyVideoEncoder.h"
 #include "MediaStreamObserver.h"
 #include "SetSessionDescriptionObserver.h"
 #include "UnityVideoEncoderFactory.h"
 #include "UnityVideoDecoderFactory.h"
 #include "UnityVideoTrackSource.h"
+#include "../NvCodec/Utils/Logger.h"
+#include "GraphicsDevice/GraphicsUtility.h"
+#include "GraphicsDevice/IGraphicsDevice.h"
+
+simplelogger::Logger* logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 
 namespace unity
 {
@@ -32,7 +31,8 @@ namespace webrtc
     Context* ContextManager::CreateContext(int uid, UnityEncoderType encoderType)
     {
         auto it = s_instance.m_contexts.find(uid);
-        if (it != s_instance.m_contexts.end()) {
+        if (it != s_instance.m_contexts.end())
+        {
             DebugLog("Using already created context with ID %d", uid);
             return nullptr;
         }
@@ -59,11 +59,11 @@ namespace webrtc
     void ContextManager::DestroyContext(int uid)
     {
         auto it = s_instance.m_contexts.find(uid);
-        std::lock_guard<std::mutex> lock(it->second->mutex);
+        std::lock_guard<std::mutex> lock(mutex);
 
         if (it != s_instance.m_contexts.end()) {
             s_instance.m_contexts.erase(it);
-            DebugLog("Unregistered context with ID %d", uid);
+            RTC_LOG(LS_INFO) << "Unregistered context with ID" << uid;
         }
     }
 
@@ -75,14 +75,15 @@ namespace webrtc
         m_contexts.clear();
     }
 
-#pragma region open an encode session
-    uint32_t Context::s_encoderId = 0;
-    uint32_t Context::GenerateUniqueId() { return s_encoderId++; }
-#pragma endregion 
-
-    bool Convert(const std::string& str, webrtc::PeerConnectionInterface::RTCConfiguration& config)
+    UnityVideoTrackSource* GetSource(MediaStreamTrackInterface* track)
     {
-        config = webrtc::PeerConnectionInterface::RTCConfiguration{};
+        VideoTrackInterface* videoTrack = static_cast<VideoTrackInterface*>(track);
+        return static_cast<UnityVideoTrackSource*>(videoTrack->GetSource());
+    }
+
+    bool Convert(const std::string& str, PeerConnectionInterface::RTCConfiguration& config)
+    {
+        config = PeerConnectionInterface::RTCConfiguration{};
         Json::CharReaderBuilder builder;
         const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
         Json::Value configJson;
@@ -164,16 +165,20 @@ namespace webrtc
 
         m_audioDevice = new rtc::RefCountedObject<DummyAudioDevice>();
 
+        IGraphicsDevice* gfxDevice = GraphicsUtility::GetGraphicsDevice();
+        const bool foundDevice = GraphicsUtility::IsHWCodecSupportedDevice();
+
 #if defined(SUPPORT_METAL) && defined(SUPPORT_SOFTWARE_ENCODER)
         //Always use SoftwareEncoder on Mac for now.
         std::unique_ptr<webrtc::VideoEncoderFactory> videoEncoderFactory = webrtc::CreateBuiltinVideoEncoderFactory();
         std::unique_ptr<webrtc::VideoDecoderFactory> videoDecoderFactory = webrtc::CreateBuiltinVideoDecoderFactory();
 #else
         std::unique_ptr<webrtc::VideoEncoderFactory> videoEncoderFactory =
-            m_encoderType == UnityEncoderType::UnityEncoderHardware ?
-            std::make_unique<UnityVideoEncoderFactory>(static_cast<IVideoEncoderObserver*>(this)) : webrtc::CreateBuiltinVideoEncoderFactory();
+            m_encoderType == UnityEncoderHardware && foundDevice ?
+            std::make_unique<UnityVideoEncoderFactory>(gfxDevice) : webrtc::CreateBuiltinVideoEncoderFactory();
+
         std::unique_ptr<webrtc::VideoDecoderFactory> videoDecoderFactory =
-            m_encoderType == UnityEncoderType::UnityEncoderHardware ?
+            m_encoderType == UnityEncoderHardware && foundDevice ?
             std::make_unique<UnityVideoDecoderFactory>() : webrtc::CreateBuiltinVideoDecoderFactory();
 #endif
 
@@ -195,77 +200,16 @@ namespace webrtc
         m_peerConnectionFactory = nullptr;
         m_audioTrack = nullptr;
 
-        m_mapIdAndEncoder.clear();
         m_mediaSteamTrackList.clear();
         m_mapClients.clear();
-        m_mapVideoCapturer.clear();
-        m_mapMediaStream.clear();
         m_mapMediaStreamObserver.clear();
         m_mapSetSessionDescriptionObserver.clear();
-        m_mapVideoEncoderParameter.clear();
         m_mapDataChannels.clear();
 
         m_workerThread->Quit();
         m_workerThread.reset();
         m_signalingThread->Quit();
         m_signalingThread.reset();
-    }
-
-    bool Context::InitializeEncoder(IEncoder* encoder, webrtc::MediaStreamTrackInterface* track)
-    {
-        if (encoder->GetCodecInitializationResult() != CodecInitializationResult::Success)
-        {
-            return false;
-        }
-
-        m_mapVideoCapturer[track]->SetEncoder(encoder);
-
-        uint32_t id = GenerateUniqueId();
-        encoder->SetEncoderId(id);
-        m_mapIdAndEncoder[id] = encoder;
-        return true;
-    }
-
-    bool Context::FinalizeEncoder(IEncoder* encoder)
-    {
-        m_mapIdAndEncoder.erase(encoder->Id());
-        return true;
-    }
-
-    bool Context::EncodeFrame(webrtc::MediaStreamTrackInterface* track)
-    {
-        auto it = m_mapVideoCapturer.find(track);
-        if(it != m_mapVideoCapturer.end() && it->second != nullptr)
-        {
-            it->second->OnFrameCaptured();
-        }
-        return true;
-    }
-
-    const VideoEncoderParameter* Context::GetEncoderParameter(const webrtc::MediaStreamTrackInterface* track)
-    {
-        return m_mapVideoEncoderParameter[track].get();
-    }
-
-    void Context::SetEncoderParameter(const webrtc::MediaStreamTrackInterface* track, int width, int height)
-    {
-        m_mapVideoEncoderParameter[track] = std::make_unique<VideoEncoderParameter>(width, height);
-    }
-
-    void Context::SetKeyFrame(uint32_t id)
-    {
-        if (m_mapIdAndEncoder.count(id))
-        {
-            m_mapIdAndEncoder[id]->SetIdrFrame();
-        }
-    }
-
-    void Context::SetRates(uint32_t id, uint32_t bitRate, int64_t frameRate)
-    {
-        if(m_mapIdAndEncoder.count(id))
-        {
-            m_mapIdAndEncoder[id]->SetRates(bitRate, frameRate);
-        }
     }
 
     UnityEncoderType Context::GetEncoderType() const
@@ -275,7 +219,8 @@ namespace webrtc
 
     CodecInitializationResult Context::GetInitializationResult(webrtc::MediaStreamTrackInterface* track)
     {
-        return m_mapVideoCapturer[track]->GetCodecInitializationResult();
+        UnityVideoTrackSource* source = GetSource(track);
+        return source->GetCodecInitializationResult();
     }
 
     webrtc::MediaStreamInterface* Context::CreateMediaStream(const std::string& streamId)
@@ -300,16 +245,21 @@ namespace webrtc
         return m_mapMediaStreamObserver[stream].get();
     }
 
-    webrtc::VideoTrackInterface* Context::CreateVideoTrack(
-        const std::string& label, void* frame)
+    VideoTrackInterface* Context::CreateVideoTrack(
+        const std::string& label, NativeTexPtr ptr, uint32_t destMemoryType)
     {
-        rtc::scoped_refptr<UnityVideoTrackSource> src =
-            new rtc::RefCountedObject<UnityVideoTrackSource>(frame, false, nullptr);
+        IGraphicsDevice* device = GraphicsUtility::GetGraphicsDevice();
 
-        rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack =
-            m_peerConnectionFactory->CreateVideoTrack(label, src).release();
-        m_mapVideoCapturer[videoTrack] = src.get();
-        return videoTrack;
+        const rtc::scoped_refptr<UnityVideoTrackSource> src =
+            new rtc::RefCountedObject<UnityVideoTrackSource>(
+                device, ptr, destMemoryType, false, nullptr);
+        m_listVideoSource.push_back(src.get());
+
+        rtc::scoped_refptr<VideoTrackInterface> videoTrack =
+            m_peerConnectionFactory->CreateVideoTrack(label, src);
+        m_mapVideoTrack[label] = videoTrack.release();
+
+        return m_mapVideoTrack[label];
     }
 
     void Context::StopMediaStreamTrack(webrtc::MediaStreamTrackInterface* track)
@@ -329,7 +279,31 @@ namespace webrtc
 
     void Context::DeleteMediaStreamTrack(webrtc::MediaStreamTrackInterface* track)
     {
+        if(track->kind() == "video")
+        {
+            VideoTrackInterface* videoTrack = m_mapVideoTrack[track->id()];
+            VideoTrackSourceInterface* source = videoTrack->GetSource();
+            const auto iter = std::find(m_listVideoSource.begin(),
+                                        m_listVideoSource.end(), source);
+            if(iter != m_listVideoSource.end())
+            {
+                m_listVideoSource.erase(iter);
+            }
+        }
         track->Release();
+    }
+
+    VideoTrackInterface* Context::FindVideoTrack(MediaStreamTrackInterface* track)
+    {
+        return m_mapVideoTrack[track->id()];
+    }
+
+    bool Context::ExistsVideoSource(UnityVideoTrackSource* source)
+    {
+        if (std::find(m_listVideoSource.begin(),
+            m_listVideoSource.end(), source) != m_listVideoSource.end())
+            return true;
+        return false;
     }
 
     void Context::ProcessAudioData(const float* data, int32 size)

@@ -4,7 +4,7 @@
 #include "MediaStreamObserver.h"
 #include "SetSessionDescriptionObserver.h"
 #include "Context.h"
-#include "Codec/EncoderFactory.h"
+#include "GraphicsDevice/GraphicsUtility.h"
 
 namespace unity
 {
@@ -89,7 +89,7 @@ extern "C"
 {
     UNITY_INTERFACE_EXPORT bool GetHardwareEncoderSupport()
     {
-        return EncoderFactory::GetHardwareEncoderSupport();
+        return true;
     }
 
     UNITY_INTERFACE_EXPORT UnityEncoderType ContextGetEncoderType(Context* context)
@@ -102,11 +102,6 @@ extern "C"
         return context->GetInitializationResult(track);
     }
 
-    UNITY_INTERFACE_EXPORT void ContextSetVideoEncoderParameter(Context* context, MediaStreamTrackInterface* track, int width, int height, UnityEncoderType type)
-    {
-        context->SetEncoderParameter(track, width, height);
-    }
-
     UNITY_INTERFACE_EXPORT MediaStreamInterface* ContextCreateMediaStream(Context* context, const char* streamId)
     {
         return context->CreateMediaStream(streamId);
@@ -117,9 +112,10 @@ extern "C"
         context->DeleteMediaStream(stream);
     }
 
-    UNITY_INTERFACE_EXPORT::webrtc::MediaStreamTrackInterface* ContextCreateVideoTrack(Context* context, const char* label, void* rt, int32 width, int32 height)
+    UNITY_INTERFACE_EXPORT MediaStreamTrackInterface* ContextCreateVideoTrack(Context* context, const char* label, void* tex, uint32_t destMemoryType)
     {
-        return context->CreateVideoTrack(label, rt);
+        NativeTexPtr ptr = GraphicsUtility::GetGraphicsDevice()->ConvertNativeFromUnityPtr(tex);
+        return context->CreateVideoTrack(label, ptr, destMemoryType);
     }
 
     UNITY_INTERFACE_EXPORT void ContextDeleteMediaStreamTrack(Context* context, ::webrtc::MediaStreamTrackInterface* track)
@@ -183,6 +179,11 @@ extern "C"
     UNITY_INTERFACE_EXPORT AudioTrackInterface** MediaStreamGetAudioTracks(MediaStreamInterface* stream, size_t* length)
     {
         return ConvertPtrArrayFromRefPtrArray<AudioTrackInterface>(stream->GetAudioTracks(), length);
+    }
+
+    UNITY_INTERFACE_EXPORT VideoTrackSourceInterface* ContextGetVideoSource(Context* context, MediaStreamTrackInterface* track)
+    {
+        return context->FindVideoTrack(track)->GetSource();
     }
 
     UNITY_INTERFACE_EXPORT TrackKind MediaStreamTrackGetKind(MediaStreamTrackInterface* track)
@@ -405,6 +406,11 @@ extern "C"
     UNITY_INTERFACE_EXPORT const RTCStatsMemberInterface** StatsGetMembers(const RTCStats* stats, size_t* length)
     {
         return ConvertArray(stats->Members(), length);
+    }
+
+    UNITY_INTERFACE_EXPORT bool StatsMemberIsDefined(const RTCStatsMemberInterface* member)
+    {
+        return member->is_defined();
     }
 
     UNITY_INTERFACE_EXPORT const char* StatsMemberGetName(const RTCStatsMemberInterface* member)

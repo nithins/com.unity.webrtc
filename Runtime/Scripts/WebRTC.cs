@@ -509,7 +509,7 @@ namespace Unity.WebRTC
         [DllImport(WebRTC.Lib)]
         public static extern void ContextDeleteDataChannel(IntPtr ptr, IntPtr ptrChannel);
         [DllImport(WebRTC.Lib)]
-        public static extern IntPtr ContextCreateVideoTrack(IntPtr ptr, [MarshalAs(UnmanagedType.LPStr, SizeConst = 256)] string label, IntPtr texturePtr);
+        public static extern IntPtr ContextCreateVideoTrack(IntPtr ptr, [MarshalAs(UnmanagedType.LPStr, SizeConst = 256)] string label, IntPtr texture, uint memoryType);
         [DllImport(WebRTC.Lib)]
         public static extern IntPtr ContextCreateAudioTrack(IntPtr ptr, [MarshalAs(UnmanagedType.LPStr, SizeConst = 256)] string label);
         [DllImport(WebRTC.Lib)]
@@ -517,9 +517,9 @@ namespace Unity.WebRTC
         [DllImport(WebRTC.Lib)]
         public static extern void ContextDeleteMediaStreamTrack(IntPtr context, IntPtr track);
         [DllImport(WebRTC.Lib)]
-        public static extern void ContextDeleteStatsReport(IntPtr context, IntPtr report);
+        public static extern IntPtr ContextGetVideoSource(IntPtr context, IntPtr track);
         [DllImport(WebRTC.Lib)]
-        public static extern void ContextSetVideoEncoderParameter(IntPtr context, IntPtr track, int width, int height);
+        public static extern void ContextDeleteStatsReport(IntPtr context, IntPtr report);
         [DllImport(WebRTC.Lib)]
         public static extern CodecInitializationResult GetInitializationResult(IntPtr context, IntPtr track);
         [DllImport(WebRTC.Lib)]
@@ -688,6 +688,9 @@ namespace Unity.WebRTC
         public static extern StatsMemberType StatsMemberGetType(IntPtr member);
         [DllImport(WebRTC.Lib)]
         [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool StatsMemberIsDefined(IntPtr member);
+        [DllImport(WebRTC.Lib)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool StatsMemberGetBool(IntPtr member);
         [DllImport(WebRTC.Lib)]
         public static extern int StatsMemberGetInt(IntPtr member);
@@ -727,22 +730,22 @@ namespace Unity.WebRTC
             Finalize = 2,
         }
 
-        public static void InitializeEncoder(IntPtr callback, IntPtr track)
+        public static void InitializeEncoder(IntPtr callback, IntPtr videoSource)
         {
-            _command.IssuePluginEventAndData(callback, (int)VideoStreamRenderEventId.Initialize, track);
+            _command.IssuePluginEventAndData(callback, (int)VideoStreamRenderEventId.Initialize, videoSource);
             Graphics.ExecuteCommandBuffer(_command);
             _command.Clear();
         }
 
-        public static void Encode(IntPtr callback, IntPtr track)
+        public static void Encode(IntPtr callback, IntPtr videoSource)
         {
-            _command.IssuePluginEventAndData(callback, (int)VideoStreamRenderEventId.Encode, track);
+            _command.IssuePluginEventAndData(callback, (int)VideoStreamRenderEventId.Encode, videoSource);
             Graphics.ExecuteCommandBuffer(_command);
             _command.Clear();
         }
-        public static void FinalizeEncoder(IntPtr callback, IntPtr track)
+        public static void FinalizeEncoder(IntPtr callback, IntPtr videoSource)
         {
-            _command.IssuePluginEventAndData(callback, (int)VideoStreamRenderEventId.Finalize, track);
+            _command.IssuePluginEventAndData(callback, (int)VideoStreamRenderEventId.Finalize, videoSource);
             Graphics.ExecuteCommandBuffer(_command);
             _command.Clear();
         }

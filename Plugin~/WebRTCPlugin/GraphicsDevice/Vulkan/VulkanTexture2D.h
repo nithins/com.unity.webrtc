@@ -1,8 +1,7 @@
 #pragma once
 
 #include "GraphicsDevice/ITexture2D.h"
-#include "WebRTCMacros.h"
-#include "Cuda/CudaImage.h"
+#include "GraphicsDevice/Cuda/CudaImage.h"
 
 namespace unity
 {
@@ -28,10 +27,12 @@ public:
     inline VkDeviceSize GetTextureImageMemorySize() const;
     inline VkFormat     GetTextureFormat() const;
 
+
 private:
     VkImage             m_textureImage;
     VkDeviceMemory      m_textureImageMemory;
     VkDeviceSize        m_textureImageMemorySize;
+    VkPhysicalDevice    m_physicalDevice;
     VkDevice            m_device;
 
     CudaImage           m_cudaImage;
@@ -39,12 +40,13 @@ private:
 
     const VkAllocationCallbacks* m_allocator = nullptr;
 
+    UnityVulkanImage m_unityVulkanImage;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void* VulkanTexture2D::GetNativeTexturePtrV() { return  m_textureImage; }
-const void* VulkanTexture2D::GetNativeTexturePtrV() const { return m_textureImage; };
+void* VulkanTexture2D::GetNativeTexturePtrV() { return &m_unityVulkanImage; }
+const void* VulkanTexture2D::GetNativeTexturePtrV() const { return &m_unityVulkanImage; };
 void* VulkanTexture2D::GetEncodeTexturePtrV() { return m_cudaImage.GetArray(); }
 const void* VulkanTexture2D::GetEncodeTexturePtrV() const { return m_cudaImage.GetArray(); }
 

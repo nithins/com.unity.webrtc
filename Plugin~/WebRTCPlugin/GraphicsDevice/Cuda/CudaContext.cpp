@@ -3,7 +3,19 @@
 #include "CudaContext.h"
 
 #include <array>
+
+#if defined(_WIN32)
+#include <cudaD3D11.h>
+#include <wrl/client.h>
+#endif
+
+
+#include "NvCodecUtils.h"
 #include "GraphicsDevice/Vulkan/VulkanUtility.h"
+
+#if defined(_WIN32)
+using namespace Microsoft::WRL;
+#endif
 
 namespace unity
 {
@@ -14,11 +26,8 @@ static void* s_hModule = nullptr;
 
 CudaContext::CudaContext() : m_context(nullptr) {
 }
-
 //---------------------------------------------------------------------------------------------------------------------
-
-CUresult CudaContext::Init(const VkInstance instance, VkPhysicalDevice physicalDevice) {
-
+CUresult LoadModule() {
     // dll check
     if (s_hModule == nullptr)
     {
@@ -34,11 +43,22 @@ CUresult CudaContext::Init(const VkInstance instance, VkPhysicalDevice physicalD
 #else
 #endif
     }
+    return CUDA_SUCCESS;
+}
+//---------------------------------------------------------------------------------------------------------------------
+
+CUresult CudaContext::Init(const VkInstance instance, VkPhysicalDevice physicalDevice) {
+
+    // dll check
+    CUresult result = LoadModule();
+    if (result != CUDA_SUCCESS) {
+        return result;
+    }
 
     CUdevice dev;
     bool foundDevice = true;
 
-    CUresult result = cuInit(0);
+    result = cuInit(0);
     if (result != CUDA_SUCCESS) {
         return result;
     }
@@ -77,6 +97,68 @@ CUresult CudaContext::Init(const VkInstance instance, VkPhysicalDevice physicalD
 
     result = cuCtxCreate(&m_context, 0, dev);
     return result;
+}
+//---------------------------------------------------------------------------------------------------------------------
+
+#if defined(_WIN32)
+CUresult CudaContext::Init(ID3D11Device* device) {
+
+    // dll check
+    CUresult result = LoadModule();
+    if (result != CUDA_SUCCESS) {
+        return result;
+    }
+
+    result = cuInit(0);
+    if (result != CUDA_SUCCESS) {
+        return result;
+    }
+    int numDevices = 0;
+    result = cuDeviceGetCount(&numDevices);
+    if (result != CUDA_SUCCESS) {
+        return result;
+    }
+
+    ComPtr<IDXGIDevice> pDxgiDevice = nullptr;
+    if (!ck(device->QueryInterface(IID_PPV_ARGS(&pDxgiDevice))))
+    {
+        return CUDA_ERROR_NO_DEVICE;
+    }
+    ComPtr<IDXGIAdapter> pDxgiAdapter = nullptr;
+    if (!ck(pDxgiDevice->GetAdapter(&pDxgiAdapter)))
+    {
+        return CUDA_ERROR_NO_DEVICE;
+    }
+    CUdevice dev;
+    if (!ck(cuD3D11GetDevice(&dev, pDxgiAdapter.Get())))
+    {
+        return CUDA_ERROR_NO_DEVICE;
+    }
+
+    result = cuCtxCreate(&m_context, 0, dev);
+    return result;
+}
+#endif
+//---------------------------------------------------------------------------------------------------------------------
+
+CUcontext CudaContext::GetContextOnThread() const
+{
+    RTC_DCHECK(m_context);
+
+    CUcontext current;
+    if (!ck(cuCtxGetCurrent(&current)))
+    {
+        throw;
+    }
+    if(m_context == current)
+    {
+        return m_context;
+    }
+    if (!ck(cuCtxSetCurrent(m_context)))
+    {
+        throw;
+    }
+    return m_context;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

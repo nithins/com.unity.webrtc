@@ -1,7 +1,12 @@
 #include "pch.h"
 #include "UnityVideoEncoderFactory.h"
 
+#include <cuda.h>
+
+
 #include "DummyVideoEncoder.h"
+#include "H264HardwareEncoder.h"
+#include "GraphicsDevice/GraphicsUtility.h"
 
 namespace unity
 {    
@@ -24,10 +29,10 @@ namespace webrtc
         return false;
     }
 
-    UnityVideoEncoderFactory::UnityVideoEncoderFactory(IVideoEncoderObserver* observer)
-    : internal_encoder_factory_(new webrtc::InternalEncoderFactory())
+    UnityVideoEncoderFactory::UnityVideoEncoderFactory(IGraphicsDevice* gfxDevice)
+    : m_gfxDevice(gfxDevice)
+    , internal_encoder_factory_(new webrtc::InternalEncoderFactory())
     {
-        m_observer = observer;
     }
 
     std::vector<webrtc::SdpVideoFormat> UnityVideoEncoderFactory::GetHardwareEncoderFormats() const
@@ -60,9 +65,12 @@ namespace webrtc
 
     std::unique_ptr<webrtc::VideoEncoder> UnityVideoEncoderFactory::CreateVideoEncoder(const webrtc::SdpVideoFormat& format)
     {
-        if (IsFormatSupported(GetHardwareEncoderFormats(), format))
+        if (IsFormatSupported(GetHardwareEncoderFormats(), format) &&
+            GraphicsUtility::IsHWCodecSupportedDevice())
         {
-            return std::make_unique<DummyVideoEncoder>(m_observer);
+            CUcontext context = m_gfxDevice->GetCuContext();
+            NV_ENC_BUFFER_FORMAT format = m_gfxDevice->GetEncodeBufferFormat();
+            return std::make_unique<H264HardwareEncoder>(context, CU_MEMORYTYPE_ARRAY, format);
         }
 
         std::unique_ptr<webrtc::VideoEncoder> internalEncoder;

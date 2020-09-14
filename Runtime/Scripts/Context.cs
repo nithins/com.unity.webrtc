@@ -136,9 +136,12 @@ namespace Unity.WebRTC
             return NativeMethods.ContextCreateAudioTrack(self, label);
         }
 
-        public IntPtr CreateVideoTrack(string label, IntPtr texturePtr)
+        public IntPtr CreateVideoTrack(string label, IntPtr texture, bool useGpu = true, bool useCpu = true)
         {
-            return NativeMethods.ContextCreateVideoTrack(self, label, texturePtr);
+            uint memoryType =
+                (useGpu ? (uint)VideoSourceMemoryType.GpuMemory : 0)
+                + (useCpu ? (uint)VideoSourceMemoryType.CpuMemory : 0);
+            return NativeMethods.ContextCreateVideoTrack(self, label, texture, memoryType);
         }
 
         public void StopMediaStreamTrack(IntPtr track)
@@ -156,32 +159,27 @@ namespace Unity.WebRTC
             NativeMethods.ContextDeleteStatsReport(self, report);
         }
 
-        public void SetVideoEncoderParameter(IntPtr track, int width, int height)
-        {
-            NativeMethods.ContextSetVideoEncoderParameter(self, track, width, height);
-        }
-
         public CodecInitializationResult GetInitializationResult(IntPtr track)
         {
             return NativeMethods.GetInitializationResult(self, track);
         }
 
-        internal void InitializeEncoder(IntPtr track)
+        internal void InitializeEncoder(IntPtr videoSource)
         {
             renderFunction = renderFunction == IntPtr.Zero ? GetRenderEventFunc() : renderFunction;
-            VideoEncoderMethods.InitializeEncoder(renderFunction, track);
+            VideoEncoderMethods.InitializeEncoder(renderFunction, videoSource);
         }
 
-        internal void FinalizeEncoder(IntPtr track)
+        internal void FinalizeEncoder(IntPtr videoSource)
         {
             renderFunction = renderFunction == IntPtr.Zero ? GetRenderEventFunc() : renderFunction;
-            VideoEncoderMethods.FinalizeEncoder(renderFunction, track);
+            VideoEncoderMethods.FinalizeEncoder(renderFunction, videoSource);
         }
 
-        internal void Encode(IntPtr track)
+        internal void Encode(IntPtr videoSource)
         {
             renderFunction = renderFunction == IntPtr.Zero ? GetRenderEventFunc() : renderFunction;
-            VideoEncoderMethods.Encode(renderFunction, track);
+            VideoEncoderMethods.Encode(renderFunction, videoSource);
         }
     }
 }

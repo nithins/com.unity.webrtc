@@ -3,9 +3,10 @@
 #include <IUnityGraphics.h>
 #include <IUnityProfiler.h>
 
-#include "Codec/EncoderFactory.h"
 #include "Context.h"
 #include "GraphicsDevice/GraphicsDevice.h"
+#include "GraphicsDevice/GraphicsUtility.h"
+#include "UnityVideoTrackSource.h"
 
 enum class VideoStreamRenderEventID
 {
@@ -14,6 +15,9 @@ enum class VideoStreamRenderEventID
     Finalize = 2
 };
 
+using namespace unity::webrtc;
+using namespace ::webrtc;
+
 namespace unity
 {
 namespace webrtc
@@ -21,16 +25,36 @@ namespace webrtc
     IUnityInterfaces* s_UnityInterfaces = nullptr;
     IUnityGraphics* s_Graphics = nullptr;
     IUnityProfiler* s_UnityProfiler = nullptr;
+    Clock* s_clock = Clock::GetRealTimeClock();
     Context* s_context = nullptr;
     IGraphicsDevice* s_device;
-    std::map<const ::webrtc::MediaStreamTrackInterface*, std::unique_ptr<IEncoder>> s_mapEncoder;
 
     const UnityProfilerMarkerDesc* s_MarkerEncode = nullptr;
     bool s_IsDevelopmentBuild = false;
+
+    IGraphicsDevice* GraphicsUtility::GetGraphicsDevice()
+    {
+        GraphicsDevice& instance = GraphicsDevice::GetInstance();
+        if (!instance.IsInitialized())
+        {
+            instance.Init(s_UnityInterfaces);
+        }
+        return instance.GetDevice();
+    }
+
+    IUnityProfiler* GetProfiler()
+    {
+        return s_UnityProfiler;
+    }
+
+    bool GraphicsUtility::IsHWCodecSupportedDevice()
+    {
+        // todo::(kazuki)
+        return true;
+    }
+
 } // end namespace webrtc
 } // end namespace unity
-
-using namespace unity::webrtc;
 
 static void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType eventType)
 {
@@ -38,14 +62,12 @@ static void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType ev
     {
     case kUnityGfxDeviceEventInitialize:
     {
-        s_mapEncoder.clear();
         break;
     }
     case kUnityGfxDeviceEventShutdown:
     {
         //UnityPluginUnload not called normally
         s_Graphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
-        s_mapEncoder.clear();
         break;
     }
     case kUnityGfxDeviceEventBeforeReset:
@@ -83,12 +105,18 @@ static void UNITY_INTERFACE_API OnRenderEvent(int eventID, void* data)
 {
     if (s_context == nullptr)
         return;
-    std::lock_guard<std::mutex> lock(s_context->mutex);
+    std::lock_guard<std::mutex> lock(ContextManager::GetInstance()->mutex);
     if(!ContextManager::GetInstance()->Exists(s_context))
         return;
-    const auto track = reinterpret_cast<::webrtc::MediaStreamTrackInterface*>(data);
-    const auto event = static_cast<VideoStreamRenderEventID>(eventID);
+    UnityVideoTrackSource* source =
+        static_cast<UnityVideoTrackSource*>(data);
+    VideoStreamRenderEventID event =
+        static_cast<VideoStreamRenderEventID>(eventID);
 
+    if(!s_context->ExistsVideoSource(source))
+    {
+        return;
+    }
     switch(event)
     {
         case VideoStreamRenderEventID::Initialize:
@@ -98,23 +126,18 @@ static void UNITY_INTERFACE_API OnRenderEvent(int eventID, void* data)
                 GraphicsDevice::GetInstance().Init(s_UnityInterfaces);
             }
             s_device = GraphicsDevice::GetInstance().GetDevice();
-            const VideoEncoderParameter* param = s_context->GetEncoderParameter(track);
-            const UnityEncoderType encoderType = s_context->GetEncoderType();
-            s_mapEncoder[track] = EncoderFactory::GetInstance().Init(param->width, param->height, s_device, encoderType);
-            if (!s_context->InitializeEncoder(s_mapEncoder[track].get(), track))
-            {
-                LogPrint("Encoder initialization faild.");
-            }
+
+            source->Init();
             return;
         }
         case VideoStreamRenderEventID::Encode:
         {
             if (s_IsDevelopmentBuild)
                 s_UnityProfiler->BeginSample(s_MarkerEncode);
-            if(!s_context->EncodeFrame(track))
-            {
-                LogPrint("Encode frame failed");
-            }
+
+            const int64_t timestamp_us = s_clock->TimeInMicroseconds();
+            source->OnFrameCaptured(timestamp_us);
+
             if (s_IsDevelopmentBuild)
                 s_UnityProfiler->EndSample(s_MarkerEncode);
 
@@ -122,12 +145,6 @@ static void UNITY_INTERFACE_API OnRenderEvent(int eventID, void* data)
         }
         case VideoStreamRenderEventID::Finalize:
         {
-            s_context->FinalizeEncoder(s_mapEncoder[track].get());
-            s_mapEncoder.erase(track);
-            if(s_mapEncoder.empty())
-            {
-                GraphicsDevice::GetInstance().Shutdown();
-            }
             return;
         }
         default: {

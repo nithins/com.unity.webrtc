@@ -1,14 +1,17 @@
 #pragma once
 
 #include "GraphicsDevice/IGraphicsDevice.h"
+#include "GraphicsDevice/Cuda/ICudaDevice.h"
 #include "WebRTCConstants.h"
+#include "GraphicsDevice/Cuda/CudaContext.h"
 
 namespace unity
 {
 namespace webrtc
 {
 
-class D3D11GraphicsDevice : public IGraphicsDevice{
+class D3D11GraphicsDevice : public IGraphicsDevice
+{
 public:
     D3D11GraphicsDevice(ID3D11Device* nativeDevice);
     virtual ~D3D11GraphicsDevice();
@@ -20,17 +23,25 @@ public:
     virtual bool CopyResourceV(ITexture2D* dest, ITexture2D* src) override;
     virtual bool CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) override;
     inline virtual GraphicsDeviceType GetDeviceType() const override;
+    inline virtual UnityGfxRenderer GetGfxRenderer() const override;
     virtual rtc::scoped_refptr < ::webrtc::I420Buffer > ConvertRGBToI420(ITexture2D* tex) override;
+
+    virtual bool IsNvCodecSupport() override { return m_nvCodecSupport; }
+    virtual CUcontext GetCuContext() override;
+    virtual NV_ENC_BUFFER_FORMAT GetEncodeBufferFormat() override { return NV_ENC_BUFFER_FORMAT_ARGB; }
 
 private:
     ID3D11Device* m_d3d11Device;
-    ID3D11DeviceContext* m_d3d11Context; 
+    ID3D11DeviceContext* m_d3d11Context;
+    bool m_nvCodecSupport;
+    CudaContext m_cudaContext;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
 
 void* D3D11GraphicsDevice::GetEncodeDevicePtrV() { return reinterpret_cast<void*>(m_d3d11Device); }
 GraphicsDeviceType D3D11GraphicsDevice::GetDeviceType() const { return GRAPHICS_DEVICE_D3D11; }
+UnityGfxRenderer D3D11GraphicsDevice::GetGfxRenderer() const { return kUnityGfxRendererD3D11; }
 
 } // end namespace webrtc
 } // end namespace unity

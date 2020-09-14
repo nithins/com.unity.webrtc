@@ -41,7 +41,6 @@ namespace Unity.WebRTC.RuntimeTest
         [UnityTest]
         [Timeout(5000)]
         [Category("MediaStream")]
-        [Ignore("TODO::Crash on windows standalone")]
         public IEnumerator VideoStreamAddTrackAndRemoveTrack()
         {
             var width = 256;
@@ -196,7 +195,6 @@ namespace Unity.WebRTC.RuntimeTest
                 foreach (var pair in stats.Dict)
                 {
                     Assert.IsNotEmpty(pair.Key);
-                    Assert.NotNull(pair.Value);
                 }
                 StatsCheck.Test(stats);
             }
@@ -242,7 +240,6 @@ namespace Unity.WebRTC.RuntimeTest
                 foreach (var pair in stats.Dict)
                 {
                     Assert.IsNotEmpty(pair.Key);
-                    Assert.NotNull(pair.Value);
                 }
                 StatsCheck.Test(stats);
             }

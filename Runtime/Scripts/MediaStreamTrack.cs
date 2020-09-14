@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Unity.WebRTC
 {
+    [Flags]
+    public enum VideoSourceMemoryType
+    {
+        GpuMemory = 1,
+        CpuMemory = 1 << 1
+    }
+
     public class MediaStreamTrack : IDisposable
     {
         internal IntPtr self;
@@ -87,6 +94,8 @@ namespace Unity.WebRTC
     {
         internal static List<VideoStreamTrack> tracks = new List<VideoStreamTrack>();
 
+        private readonly IntPtr m_videoSource;
+
         readonly bool m_needFlip = false;
         readonly UnityEngine.Texture m_sourceTexture;
         readonly UnityEngine.RenderTexture m_destTexture;
@@ -98,8 +107,8 @@ namespace Unity.WebRTC
             return tex;
         }
 
-        internal VideoStreamTrack(string label, UnityEngine.Texture source, UnityEngine.RenderTexture dest, int width, int height)
-            : this(label, dest.GetNativeTexturePtr(), width, height)
+        internal VideoStreamTrack(string label, UnityEngine.Texture source, UnityEngine.RenderTexture dest, bool useGpu, bool useCpu)
+            : this(label, dest.GetNativeTexturePtr(), useGpu, useCpu)
         {
             m_needFlip = true;
             m_sourceTexture = source;
@@ -130,7 +139,7 @@ namespace Unity.WebRTC
             {
                 UnityEngine.Graphics.Blit(m_sourceTexture, m_destTexture, WebRTC.flipMat);
             }
-            WebRTC.Context.Encode(self);
+            WebRTC.Context.Encode(m_videoSource);
         }
 
         /// <summary>
@@ -139,19 +148,17 @@ namespace Unity.WebRTC
         /// </summary>
         /// <param name="label"></param>
         /// <param name="source"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        public VideoStreamTrack(string label, UnityEngine.RenderTexture source)
-            : this(label, source, CreateRenderTexture(source.width, source.height, source.format), source.width, source.height)
+        /// <param name="useGpu"></param>
+        /// <param name="useCpu"></param>
+        public VideoStreamTrack(string label, RenderTexture source, bool useGpu = true, bool useCpu = true)
+            : this(label, source, CreateRenderTexture(source.width, source.height, source.format), useGpu, useCpu)
         {
         }
 
-        public VideoStreamTrack(string label, UnityEngine.Texture source)
-            : this(label,
-                source,
+        public VideoStreamTrack(string label, Texture source, bool useGpu, bool useCpu)
+            : this(label, source,
                 CreateRenderTexture(source.width, source.height, WebRTC.GetSupportedRenderTextureFormat(SystemInfo.graphicsDeviceType)),
-                source.width,
-                source.height)
+                useGpu , useCpu)
         {
         }
 
@@ -165,13 +172,13 @@ namespace Unity.WebRTC
         /// </summary>
         /// <param name="label"></param>
         /// <param name="ptr"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        public VideoStreamTrack(string label, IntPtr ptr, int width, int height)
-            : base(WebRTC.Context.CreateVideoTrack(label, ptr))
+        /// <param name="useGpu"></param>
+        /// <param name="useCpu"></param>
+        public VideoStreamTrack(string label, IntPtr ptr, bool useGpu, bool useCpu)
+            : base(WebRTC.Context.CreateVideoTrack(label, ptr, useGpu, useCpu))
         {
-            WebRTC.Context.SetVideoEncoderParameter(self, width, height);
-            WebRTC.Context.InitializeEncoder(self);
+            m_videoSource = GetVideoTrackSource();
+            WebRTC.Context.InitializeEncoder(m_videoSource);
             tracks.Add(this);
         }
 
@@ -183,7 +190,7 @@ namespace Unity.WebRTC
             }
             if (self != IntPtr.Zero && !WebRTC.Context.IsNull)
             {
-                WebRTC.Context.FinalizeEncoder(self);
+                WebRTC.Context.FinalizeEncoder(m_videoSource);
                 tracks.Remove(this);
                 WebRTC.Context.DeleteMediaStreamTrack(self);
                 UnityEngine.Object.DestroyImmediate(m_destTexture);
@@ -191,6 +198,11 @@ namespace Unity.WebRTC
             }
             this.disposed = true;
             GC.SuppressFinalize(this);
+        }
+
+        internal IntPtr GetVideoTrackSource()
+        {
+            return NativeMethods.ContextGetVideoSource(WebRTC.Context.self, self);
         }
     }
 

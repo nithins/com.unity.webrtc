@@ -5,6 +5,7 @@
 #include "IUnityGraphicsVulkan.h"
 #include "vulkan/vulkan.h"
 #include "VulkanUtility.h"
+#include "WebRTCMacros.h"
 
 namespace unity
 {
@@ -44,8 +45,8 @@ bool VulkanGraphicsDevice::InitV() {
 #endif
     }
 
-    if (CUDA_SUCCESS!=m_cudaContext.Init(m_instance, m_physicalDevice))
-        return false;
+    CUresult result = m_cudaContext.Init(m_instance, m_physicalDevice);
+    m_nvCodecSupport = CUDA_SUCCESS == result;
 
     return (VK_SUCCESS == CreateCommandPool());
 
@@ -71,7 +72,6 @@ void VulkanGraphicsDevice::ShutdownV() {
 
 //Returns null if failed
 ITexture2D* VulkanGraphicsDevice::CreateDefaultTextureV(const uint32_t w, const uint32_t h) {
-
     VulkanTexture2D* vulkanTexture = new VulkanTexture2D(w, h);
     if (!vulkanTexture->Init(m_physicalDevice, m_device)) {
         vulkanTexture->Shutdown();
@@ -143,30 +143,35 @@ bool VulkanGraphicsDevice::CopyResourceV(ITexture2D* dest, ITexture2D* src) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+NativeTexPtr VulkanGraphicsDevice::ConvertNativeFromUnityPtr(void* tex)
+{
+    std::unique_ptr<UnityVulkanImage> unityVulkanImage = std::make_unique<UnityVulkanImage>();
+    VkImageSubresource subResource{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 0 };
+    if (!m_unityVulkan->AccessTexture(tex, &subResource, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT, kUnityVulkanResourceAccess_PipelineBarrier,
+        unityVulkanImage.get()))
+    {
+        return nullptr;
+    }
+    return unityVulkanImage.release();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 bool VulkanGraphicsDevice::CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) {
     if (nullptr == dest || nullptr == nativeTexturePtr)
         return false;
 
     VulkanTexture2D* destTexture = reinterpret_cast<VulkanTexture2D*>(dest);
-    UnityVulkanImage unityVulkanImage;
-    VkImageSubresource subResource { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0 };
+    UnityVulkanImage* unityVulkanImage = static_cast<UnityVulkanImage*>(nativeTexturePtr);
 
-    if (!m_unityVulkan->AccessTexture(nativeTexturePtr, &subResource, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT, kUnityVulkanResourceAccess_PipelineBarrier,
-        &unityVulkanImage))
-    {
-        return false;
-    }
-
-    if (destTexture->GetImage() == unityVulkanImage.image)
+    if (destTexture->GetImage() == unityVulkanImage->image)
         return false;
 
     //The layouts of All VulkanTexture2D should be VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, so no transition for destTex
     VULKAN_CHECK_FAILVALUE(
         VulkanUtility::CopyImage(m_device, m_commandPool, m_graphicsQueue,
-            unityVulkanImage.image, destTexture->GetImage(), destTexture->GetWidth(), destTexture->GetHeight()),
-        false
-    );
+            unityVulkanImage->image, destTexture->GetImage(), destTexture->GetWidth(), destTexture->GetHeight()),
+        false);
 
     return true;
 }

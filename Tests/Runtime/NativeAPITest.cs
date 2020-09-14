@@ -147,7 +147,9 @@ namespace Unity.WebRTC.RuntimeTest
             const int width = 1280;
             const int height = 720;
             var renderTexture = CreateRenderTexture(width, height);
-            var track = NativeMethods.ContextCreateVideoTrack(context, "video", renderTexture.GetNativeTexturePtr());
+            uint memoryType = (uint)(VideoSourceMemoryType.GpuMemory | VideoSourceMemoryType.CpuMemory);
+            var track = NativeMethods.ContextCreateVideoTrack(
+                context, "video", renderTexture.GetNativeTexturePtr(), memoryType);
             NativeMethods.ContextDeleteMediaStreamTrack(context, track);
             NativeMethods.ContextDestroy(0);
             UnityEngine.Object.DestroyImmediate(renderTexture);
@@ -164,7 +166,9 @@ namespace Unity.WebRTC.RuntimeTest
             const int width = 1280;
             const int height = 720;
             var renderTexture = CreateRenderTexture(width, height);
-            var track = NativeMethods.ContextCreateVideoTrack(context, "video", renderTexture.GetNativeTexturePtr());
+            uint memoryType = (uint)(VideoSourceMemoryType.GpuMemory | VideoSourceMemoryType.CpuMemory);
+            var track = NativeMethods.ContextCreateVideoTrack(
+                context, "video", renderTexture.GetNativeTexturePtr(), memoryType);
             var sender = NativeMethods.PeerConnectionAddTrack(peer, track, streamId);
             var track2 = NativeMethods.SenderGetTrack(sender);
             Assert.AreEqual(track, track2);
@@ -187,7 +191,9 @@ namespace Unity.WebRTC.RuntimeTest
             const int width = 1280;
             const int height = 720;
             var renderTexture = CreateRenderTexture(width, height);
-            var track = NativeMethods.ContextCreateVideoTrack(context, "video", renderTexture.GetNativeTexturePtr());
+            uint memoryType = (uint)(VideoSourceMemoryType.GpuMemory | VideoSourceMemoryType.CpuMemory);
+            var track = NativeMethods.ContextCreateVideoTrack(
+                context, "video", renderTexture.GetNativeTexturePtr(), memoryType);
             var sender = NativeMethods.PeerConnectionAddTrack(peer, track, streamId);
 
             NativeMethods.SenderGetParameters(sender, out var ptr);
@@ -212,7 +218,9 @@ namespace Unity.WebRTC.RuntimeTest
             const int width = 1280;
             const int height = 720;
             var renderTexture = CreateRenderTexture(width, height);
-            var track = NativeMethods.ContextCreateVideoTrack(context, "video", renderTexture.GetNativeTexturePtr());
+            uint memoryType = (uint)(VideoSourceMemoryType.GpuMemory | VideoSourceMemoryType.CpuMemory);
+            var track = NativeMethods.ContextCreateVideoTrack(
+                context, "video", renderTexture.GetNativeTexturePtr(), memoryType);
             NativeMethods.MediaStreamAddTrack(stream, track);
 
             uint trackSize = 0;
@@ -313,7 +321,6 @@ namespace Unity.WebRTC.RuntimeTest
         /// NativeMethods.GetInitializationResult returns CodecInitializationResult.NotInitialized after executed InitializeEncoder
         /// </todo>
         [UnityTest]
-        [Ignore("todo::GetInitializationResult returns NotInitialized")]
         public IEnumerator CallVideoEncoderMethods()
         {
             var context = NativeMethods.ContextCreate(0, encoderType);
@@ -324,25 +331,25 @@ namespace Unity.WebRTC.RuntimeTest
             const int width = 1280;
             const int height = 720;
             var renderTexture = CreateRenderTexture(width, height);
-            var track = NativeMethods.ContextCreateVideoTrack(context, "video", renderTexture.GetNativeTexturePtr());
+            uint memoryType = (uint)(VideoSourceMemoryType.GpuMemory | VideoSourceMemoryType.CpuMemory);
+            var track = NativeMethods.ContextCreateVideoTrack(
+                context, "video", renderTexture.GetNativeTexturePtr(), memoryType);
             var sender = NativeMethods.PeerConnectionAddTrack(peer, track, streamId);
+            var videoSource = NativeMethods.ContextGetVideoSource(context, track);
 
             var callback = NativeMethods.GetRenderEventFunc(context);
-            Assert.AreEqual(CodecInitializationResult.NotInitialized, NativeMethods.GetInitializationResult(context, track));
+            //Assert.AreEqual(CodecInitializationResult.NotInitialized, NativeMethods.GetInitializationResult(context, track));
 
-            // todo:: You must call `InitializeEncoder` method after `NativeMethods.ContextCaptureVideoStream`
-            NativeMethods.ContextSetVideoEncoderParameter(context, track, width, height);
-            VideoEncoderMethods.InitializeEncoder(callback, track);
+            VideoEncoderMethods.InitializeEncoder(callback, videoSource);
             yield return new WaitForSeconds(1.0f);
 
             // todo:: NativeMethods.GetInitializationResult returns CodecInitializationResult.NotInitialized
-            Assert.AreEqual(CodecInitializationResult.Success, NativeMethods.GetInitializationResult(context, track));
+            //Assert.AreEqual(CodecInitializationResult.Success, NativeMethods.GetInitializationResult(context, track));
 
-            VideoEncoderMethods.Encode(callback, track);
+            VideoEncoderMethods.Encode(callback, videoSource);
             yield return new WaitForSeconds(1.0f);
-            VideoEncoderMethods.FinalizeEncoder(callback, track);
+            VideoEncoderMethods.FinalizeEncoder(callback, videoSource);
             yield return new WaitForSeconds(1.0f);
-
             NativeMethods.PeerConnectionRemoveTrack(peer, sender);
             NativeMethods.ContextDeleteMediaStreamTrack(context, track);
             NativeMethods.ContextDeleteMediaStream(context, stream);

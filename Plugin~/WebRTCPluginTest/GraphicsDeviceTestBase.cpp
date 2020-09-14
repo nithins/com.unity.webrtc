@@ -1,13 +1,15 @@
 #include "pch.h"
 #include "GraphicsDeviceTestBase.h"
-#include "../WebRTCPlugin/PlatformBase.h"
-#include "../WebRTCPlugin/GraphicsDevice/GraphicsDevice.h"
+
+#include "NvCodecUtils.h"
+#include "PlatformBase.h"
+#include "GraphicsDevice/GraphicsDevice.h"
 
 #if defined(SUPPORT_D3D11) // D3D11
 
 #include <d3d11.h>
 #include <wrl/client.h>
-#include "../WebRTCPlugin/GraphicsDevice/D3D12/D3D12GraphicsDevice.h"
+#include "GraphicsDevice/D3D12/D3D12GraphicsDevice.h"
 
 #endif
 
@@ -17,9 +19,11 @@
 #endif
 
 #if defined(SUPPORT_OPENGL_CORE) // OpenGL
-
 #include <GL/glut.h>
+#endif
 
+#if defined(SUPPORT_VULKAN)
+#include <vulkan/vulkan_win32.h>
 #endif
 
 namespace unity
@@ -120,8 +124,130 @@ void* CreateDeviceD3D12()
 
     return pD3D12Device.Get();
 }
+#endif
+#if defined(SUPPORT_VULKAN)  // Vulkan
+
+inline void VKCHECK(VkResult result)
+{
+    if (result != VK_SUCCESS)
+    {
+        RTC_LOG(LS_ERROR) << result;
+        throw result;
+    }
+}
+std::unique_ptr<UnityVulkanInstance> pVkInstance;
+
+void* CreateDeviceVulkan()
+{
+    // Extension
+    std::vector<const char*> instanceExtensions =
+    {
+        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+#if defined(_DEBUG)
+        VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+#endif
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
+    };
+
+    std::vector<const char*> deviceExtensions =
+    {
+
+#ifndef _WIN32
+    VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
+    VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
+#else
+    VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME, //vkGetMemoryWin32HandleKHR()
+    VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME
+#endif
+    };
+
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "test";
+    appInfo.apiVersion = VK_API_VERSION_1_1;
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+
+    const char* layers[] = { "VK_LAYER_LUNARG_standard_validation" };
+    VkInstanceCreateInfo instanceInfo {};
+    instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceInfo.enabledExtensionCount = instanceExtensions.size();
+    instanceInfo.ppEnabledExtensionNames = instanceExtensions.data();
+    instanceInfo.enabledLayerCount = std::size(layers);
+    instanceInfo.ppEnabledLayerNames = layers;
+    instanceInfo.pApplicationInfo = &appInfo;
+    VkInstance instance = nullptr;
+    VKCHECK(vkCreateInstance(&instanceInfo, nullptr, &instance));
+
+    // create physical device
+    uint32_t devCount = 0;
+    VKCHECK(vkEnumeratePhysicalDevices(instance, &devCount, nullptr));
+    std::vector<VkPhysicalDevice> physicalDeviceList(devCount);
+    VKCHECK(vkEnumeratePhysicalDevices(instance, &devCount, physicalDeviceList.data()));
+    const VkPhysicalDevice physicalDevice = physicalDeviceList[0];
+    VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
+
+    // create logical device
+    uint32_t extensionCount = 0;
+    VKCHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr));
+    std::vector<VkExtensionProperties> extensionPropertiesList(extensionCount);
+    VKCHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, extensionPropertiesList.data()));
+    std::vector<const char*> availableExtensions;
+    for (const auto& v : extensionPropertiesList)
+    {
+        availableExtensions.push_back(v.extensionName);
+    }
+
+    // queueFamilyIndex
+    uint32_t propertiesCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &propertiesCount, nullptr);
+    std::vector<VkQueueFamilyProperties> properies(propertiesCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &propertiesCount, properies.data());
+    uint32_t queueFamilyIndex = 0;
+    for(uint32_t i = 0; i < propertiesCount; i++)
+    {
+        if(properies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+            queueFamilyIndex = i;
+            break;
+        }
+    }
+
+    // create device queue create info
+    const float defaultQueuePriority = 1.0f;
+    VkDeviceQueueCreateInfo deviceQueueCreateInfo = {};
+    deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
+    deviceQueueCreateInfo.pNext = nullptr;
+    deviceQueueCreateInfo.queueCount = 1;
+    deviceQueueCreateInfo.pQueuePriorities = &defaultQueuePriority;
+
+    // create device create info
+    VkDeviceCreateInfo deviceCreateInfo = {};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
+    deviceCreateInfo.enabledExtensionCount = deviceExtensions.size();
+    deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    VkDevice device;
+    VKCHECK(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device));
+
+    VkQueue queue;
+    vkGetDeviceQueue(device, queueFamilyIndex, 0, &queue);
+
+    pVkInstance = std::make_unique<UnityVulkanInstance>();
+    pVkInstance->instance = instance;
+    pVkInstance->physicalDevice = physicalDevice;
+    pVkInstance->device = device;
+    pVkInstance->queueFamilyIndex = queueFamilyIndex;
+    pVkInstance->graphicsQueue = queue;
+    return pVkInstance.get();
+}
 
 #endif
+
+
 #if defined(SUPPORT_METAL)  // Metal
 
 void* CreateDeviceMetal()
@@ -149,7 +275,7 @@ void* CreateDeviceOpenGL()
 
 #endif
 
-IUnityInterface* CreateUnityInterface(UnityGfxRenderer renderer) {
+void* CreateArg(UnityGfxRenderer renderer) {
 
     switch(renderer)
     {
@@ -159,7 +285,7 @@ IUnityInterface* CreateUnityInterface(UnityGfxRenderer renderer) {
 #endif
 #if defined(SUPPORT_D3D12)
     case kUnityGfxRendererD3D12:
-        return nullptr;
+        return pCommandQueue.Get();
 #endif
 #if defined(SUPPORT_OPENGL_CORE)
     case kUnityGfxRendererOpenGLCore:
@@ -167,7 +293,7 @@ IUnityInterface* CreateUnityInterface(UnityGfxRenderer renderer) {
 #endif
 #if defined(SUPPORT_METAL)  // Metal
     case kUnityGfxRendererMetal:
-        return new DummyUnityGraphicsMetal();
+        return nullptr;
 #endif
     }
     return nullptr;
@@ -187,6 +313,10 @@ void* CreateDevice(UnityGfxRenderer renderer)
     case kUnityGfxRendererD3D12:
         return CreateDeviceD3D12();
 #endif
+#if defined(SUPPORT_VULKAN)
+    case kUnityGfxRendererVulkan:
+        return CreateDeviceVulkan();
+#endif
 #if defined(SUPPORT_OPENGL_CORE)
     case kUnityGfxRendererOpenGLCore:
         return CreateDeviceOpenGL();
@@ -203,21 +333,11 @@ void* CreateDevice(UnityGfxRenderer renderer)
 GraphicsDeviceTestBase::GraphicsDeviceTestBase()
 {
     std::tie(m_unityGfxRenderer, m_encoderType) = GetParam();
-    const auto pGraphicsDevice = CreateDevice(m_unityGfxRenderer);
-    const auto unityInterface = CreateUnityInterface(m_unityGfxRenderer);
+    void* pGraphicsDevice = CreateDevice(m_unityGfxRenderer);
+    void* arg = CreateArg(m_unityGfxRenderer);
 
-    if (m_unityGfxRenderer == kUnityGfxRendererD3D12)
-    {
-#if defined(SUPPORT_D3D12)
-        m_device = new D3D12GraphicsDevice(static_cast<ID3D12Device*>(pGraphicsDevice), pCommandQueue.Get());
-        m_device->InitV();
-#endif
-    }
-    else
-    {
-        GraphicsDevice::GetInstance().Init(m_unityGfxRenderer, pGraphicsDevice, unityInterface);
-        m_device = GraphicsDevice::GetInstance().GetDevice();
-    }
+    GraphicsDevice::GetInstance().Init(m_unityGfxRenderer, pGraphicsDevice, arg);
+    m_device = GraphicsDevice::GetInstance().GetDevice();
 
     if (m_device == nullptr)
         throw;

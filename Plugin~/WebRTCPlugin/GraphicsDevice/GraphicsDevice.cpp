@@ -73,7 +73,7 @@ bool GraphicsDevice::Init(IUnityInterfaces* unityInterface) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, IUnityInterface* unityInterface)
+bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, void* arg)
 {
     m_rendererType = rendererType;
     switch (rendererType) {
@@ -86,7 +86,7 @@ bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, IUn
     case kUnityGfxRendererD3D12: {
 #if defined(SUPPORT_D3D12)
         m_device = new D3D12GraphicsDevice(static_cast<ID3D12Device*>(device),
-            reinterpret_cast<IUnityGraphicsD3D12v5*>(unityInterface)
+            static_cast<ID3D12CommandQueue*>(arg)
         );
 #endif
         break;
@@ -101,7 +101,7 @@ bool GraphicsDevice::Init(const UnityGfxRenderer rendererType, void* device, IUn
     case kUnityGfxRendererVulkan: {
         const UnityVulkanInstance* vulkan = reinterpret_cast<const UnityVulkanInstance*>(device);
         m_device = new VulkanGraphicsDevice(
-            reinterpret_cast<IUnityGraphicsVulkan*>(unityInterface),
+            nullptr,
             vulkan->instance,
             vulkan->physicalDevice,
             vulkan->device,

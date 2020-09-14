@@ -1,8 +1,10 @@
 #pragma once
 
 #include "GraphicsDevice/IGraphicsDevice.h"
+#include "GraphicsDevice/Cuda/ICudaDevice.h"
 #include "WebRTCConstants.h"
 #include "D3D12Texture2D.h"
+#include "GraphicsDevice/Cuda/CudaContext.h"
 
 namespace unity
 {
@@ -39,7 +41,8 @@ inline void ThrowIfFailed(HRESULT hr)
     }
 }
 
-class D3D12GraphicsDevice : public IGraphicsDevice{
+class D3D12GraphicsDevice : public IGraphicsDevice
+{
 public:
     explicit D3D12GraphicsDevice(ID3D12Device* nativeDevice, IUnityGraphicsD3D12v5* unityInterface );
     explicit D3D12GraphicsDevice(ID3D12Device* nativeDevice, ID3D12CommandQueue* commandQueue);
@@ -52,12 +55,18 @@ public:
     virtual bool CopyResourceV(ITexture2D* dest, ITexture2D* src) override;
     virtual bool CopyResourceFromNativeV(ITexture2D* dest, void* nativeTexturePtr) override;
     inline virtual GraphicsDeviceType GetDeviceType() const override;
+    inline virtual UnityGfxRenderer GetGfxRenderer() const override;
 
     virtual ITexture2D* CreateCPUReadTextureV(uint32_t w, uint32_t h) override;
     virtual rtc::scoped_refptr<webrtc::I420Buffer> ConvertRGBToI420(ITexture2D* tex) override;
 
-private:
+    virtual bool IsNvCodecSupport() override { return m_nvCodecSupport; }
+    virtual CUcontext GetCuContext() override;
+    virtual NV_ENC_BUFFER_FORMAT GetEncodeBufferFormat() override { return NV_ENC_BUFFER_FORMAT_ARGB; }
 
+    ID3D11Texture2D* GetTempTexture(uint32_t w, uint32_t h);
+
+private:
     D3D12Texture2D* CreateSharedD3D12Texture(uint32_t w, uint32_t h);
     void WaitForFence(ID3D12Fence* fence, HANDLE handle, uint64_t* fenceValue);
     void Barrier(ID3D12Resource* res,
@@ -71,6 +80,8 @@ private:
     ID3D11Device5* m_d3d11Device;
     ID3D11DeviceContext4* m_d3d11Context;
 
+    bool m_nvCodecSupport;
+    CudaContext m_cudaContext;
 
     //[TODO-sin: 2019-12-2] //This should be allocated for each frame.
     ID3D12CommandAllocatorPtr m_commandAllocator;
@@ -80,6 +91,9 @@ private:
     ID3D12Fence* m_copyResourceFence;
 	HANDLE m_copyResourceEventHandle;
     uint64_t m_copyResourceFenceValue = 1;
+
+    CUcontext m_context;
+    CUdevice m_device;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -87,6 +101,7 @@ private:
 //use D3D11. See notes below
 void* D3D12GraphicsDevice::GetEncodeDevicePtrV() { return reinterpret_cast<void*>(m_d3d11Device); }
 GraphicsDeviceType D3D12GraphicsDevice::GetDeviceType() const { return GRAPHICS_DEVICE_D3D12; }
+UnityGfxRenderer D3D12GraphicsDevice::GetGfxRenderer() const { return kUnityGfxRendererD3D12; }
 
 } // end namespace webrtc
 } // end namespace unity

@@ -20,22 +20,14 @@ if(MSVC)
   file(GLOB append_source
     ../WebRTCPlugin/GraphicsDevice/Vulkan/*.h
     ../WebRTCPlugin/GraphicsDevice/Vulkan/*.cpp
-    ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.h
-    ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.cpp
     ../WebRTCPlugin/GraphicsDevice/D3D11/*.h
     ../WebRTCPlugin/GraphicsDevice/D3D11/*.cpp
     ../WebRTCPlugin/GraphicsDevice/D3D12/*.h
     ../WebRTCPlugin/GraphicsDevice/D3D12/*.cpp
-    ../WebRTCPlugin/Codec/SoftwareCodec/*.h
-    ../WebRTCPlugin/Codec/SoftwareCodec/*.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D11.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D11.h
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D12.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderD3D12.h
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoder.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoder.h
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.h
+    ../WebRTCPlugin/GraphicsDevice/Cuda/*.h
+    ../WebRTCPlugin/GraphicsDevice/Cuda/*.cpp
+    ../WebRTCPlugin/Codec/NvCodec/*.cpp
+    ../WebRTCPlugin/Codec/NvCodec/*.h
   )
   list (APPEND sources ${append_source})
 elseif(APPLE)
@@ -44,8 +36,6 @@ elseif(APPLE)
     ../WebRTCPlugin/*.mm
     ../WebRTCPlugin/GraphicsDevice/Metal/*.h
     ../WebRTCPlugin/GraphicsDevice/Metal/*.mm
-    ../WebRTCPlugin/Codec/SoftwareCodec/*.h
-    ../WebRTCPlugin/Codec/SoftwareCodec/*.cpp
     #Codec/VideoToolbox/VTEncoderMetal.mm
     #Codec/VideoToolbox/VTEncoderMetal.h
   )
@@ -58,14 +48,10 @@ elseif(UNIX)
     ../WebRTCPlugin/GraphicsDevice/OpenGL/*.cpp
     ../WebRTCPlugin/GraphicsDevice/Vulkan/*.h
     ../WebRTCPlugin/GraphicsDevice/Vulkan/*.cpp
-    ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.h
-    ../WebRTCPlugin/GraphicsDevice/Vulkan/Cuda/*.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoder.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoder.h
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderGL.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderGL.h
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.cpp
-    ../WebRTCPlugin/Codec/NvCodec/NvEncoderCuda.h
+    ../WebRTCPlugin/GraphicsDevice/Cuda/*.h
+    ../WebRTCPlugin/GraphicsDevice/Cuda/*.cpp
+    ../WebRTCPlugin/Codec/NvCodec/*.cpp
+    ../WebRTCPlugin/Codec/NvCodec/*.h
   )
   list (APPEND sources ${append_source})
 endif()

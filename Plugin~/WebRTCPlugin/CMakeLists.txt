@@ -17,22 +17,14 @@ if(MSVC)
   file(GLOB append_source
     GraphicsDevice/Vulkan/*.h
     GraphicsDevice/Vulkan/*.cpp
-    GraphicsDevice/Vulkan/Cuda/*.h
-    GraphicsDevice/Vulkan/Cuda/*.cpp
     GraphicsDevice/D3D11/*.h
     GraphicsDevice/D3D11/*.cpp
     GraphicsDevice/D3D12/*.h
     GraphicsDevice/D3D12/*.cpp
-    Codec/SoftwareCodec/*.h
-    Codec/SoftwareCodec/*.cpp
-    Codec/NvCodec/NvEncoderD3D11.cpp
-    Codec/NvCodec/NvEncoderD3D11.h
-    Codec/NvCodec/NvEncoderD3D12.cpp
-    Codec/NvCodec/NvEncoderD3D12.h
-    Codec/NvCodec/NvEncoder.cpp
-    Codec/NvCodec/NvEncoder.h
-    Codec/NvCodec/NvEncoderCuda.cpp
-    Codec/NvCodec/NvEncoderCuda.h
+    GraphicsDevice/Cuda/*.h
+    GraphicsDevice/Cuda/*.cpp
+    Codec/NvCodec/*.h
+    Codec/NvCodec/*.cpp
   )
   list (APPEND sources ${append_source})
 elseif(APPLE)
@@ -41,8 +33,6 @@ elseif(APPLE)
     *.mm
     GraphicsDevice/Metal/*.h
     GraphicsDevice/Metal/*.mm
-    Codec/SoftwareCodec/*.h
-    Codec/SoftwareCodec/*.cpp
   )
   list (APPEND sources ${append_source})
 elseif(UNIX)
@@ -51,14 +41,10 @@ elseif(UNIX)
     GraphicsDevice/OpenGL/*.cpp
     GraphicsDevice/Vulkan/*.h
     GraphicsDevice/Vulkan/*.cpp
-    GraphicsDevice/Vulkan/Cuda/*.h
-    GraphicsDevice/Vulkan/Cuda/*.cpp
-    Codec/NvCodec/NvEncoder.cpp
-    Codec/NvCodec/NvEncoder.h
-    Codec/NvCodec/NvEncoderGL.cpp
-    Codec/NvCodec/NvEncoderGL.h
-    Codec/NvCodec/NvEncoderCuda.cpp
-    Codec/NvCodec/NvEncoderCuda.h
+    GraphicsDevice/Cuda/*.h
+    GraphicsDevice/Cuda/*.cpp
+    Codec/NvCodec/*.h
+    Codec/NvCodec/*.cpp
   )
   list (APPEND sources ${append_source})
 endif()

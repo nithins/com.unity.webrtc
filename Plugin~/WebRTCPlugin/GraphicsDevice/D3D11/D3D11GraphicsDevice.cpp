@@ -1,16 +1,24 @@
 #include "pch.h"
 #include "D3D11GraphicsDevice.h"
+
+#include <cuda.h>
+#include <wrl/client.h>
+
+
 #include "D3D11Texture2D.h"
+#include "NvCodecUtils.h"
 #include "GraphicsDevice/GraphicsUtility.h"
+
+using namespace Microsoft::WRL;
+using namespace ::webrtc;
 
 namespace unity
 {
 namespace webrtc
 {
 
-namespace webrtc = ::webrtc;
-
-D3D11GraphicsDevice::D3D11GraphicsDevice(ID3D11Device* nativeDevice) : m_d3d11Device(nativeDevice)
+D3D11GraphicsDevice::D3D11GraphicsDevice(ID3D11Device* nativeDevice)
+    : m_d3d11Device(nativeDevice)
 {
     m_d3d11Device->GetImmediateContext(&m_d3d11Context);
 }
@@ -22,13 +30,19 @@ D3D11GraphicsDevice::~D3D11GraphicsDevice() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool D3D11GraphicsDevice::InitV() {
+bool D3D11GraphicsDevice::InitV()
+{
+    CUresult result = m_cudaContext.Init(m_d3d11Device);
+    m_nvCodecSupport = CUDA_SUCCESS == result;
+
     return true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void D3D11GraphicsDevice::ShutdownV() {
+void D3D11GraphicsDevice::ShutdownV()
+{
+    m_cudaContext.Shutdown();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -94,7 +108,7 @@ bool D3D11GraphicsDevice::CopyResourceFromNativeV(ITexture2D* dest, void* native
 
 //---------------------------------------------------------------------------------------------------------------------
 
-rtc::scoped_refptr<webrtc::I420Buffer> D3D11GraphicsDevice::ConvertRGBToI420(ITexture2D* tex) {
+rtc::scoped_refptr<I420Buffer> D3D11GraphicsDevice::ConvertRGBToI420(ITexture2D* tex) {
     D3D11_MAPPED_SUBRESOURCE resource;
 
     ID3D11Resource* nativeTex = reinterpret_cast<ID3D11Resource*>(tex->GetNativeTexturePtrV());
@@ -110,12 +124,17 @@ rtc::scoped_refptr<webrtc::I420Buffer> D3D11GraphicsDevice::ConvertRGBToI420(ITe
     const uint32_t width = tex->GetWidth();
     const uint32_t height = tex->GetHeight();
 
-    rtc::scoped_refptr<webrtc::I420Buffer> i420_buffer = GraphicsUtility::ConvertRGBToI420Buffer(
+    rtc::scoped_refptr<I420Buffer> i420_buffer = GraphicsUtility::ConvertRGBToI420Buffer(
         width, height, resource.RowPitch, static_cast<uint8_t*>(resource.pData)
     );
 
     m_d3d11Context->Unmap(nativeTex, 0);
     return i420_buffer;
+}
+
+CUcontext D3D11GraphicsDevice::GetCuContext()
+{
+    return m_cudaContext.GetContextOnThread();
 }
 } //end namespace webrtc
 } //end namespace unity
