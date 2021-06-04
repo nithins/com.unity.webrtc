@@ -25,6 +25,14 @@ namespace Unity.WebRTC.Samples
         {
             get { return s_enableHWCodec ? EncoderType.Hardware : EncoderType.Software; }
         }
+
+        public static RTCConfiguration GetSelectedSdpSemantics()
+        {
+            RTCConfiguration config = default;
+            config.iceServers = new[] {new RTCIceServer {urls = new[] {"stun:stun.l.google.com:19302"}}};
+
+            return config;
+        }
     }
 
     internal class SceneSelectUI : MonoBehaviour
@@ -43,6 +51,7 @@ namespace Unity.WebRTC.Samples
         [SerializeField] private Button buttonVideoReceive;
         [SerializeField] private Button buttonBandwidth;
         [SerializeField] private Button buttonPerfectNegotiation;
+        [SerializeField] private Button buttonVideoSendReceive;
 
         void Start()
         {
@@ -63,6 +72,7 @@ namespace Unity.WebRTC.Samples
             buttonVideoReceive.onClick.AddListener(OnPressedVideoReceiveButton);
             buttonBandwidth.onClick.AddListener(OnPressedBandwidthButton);
             buttonPerfectNegotiation.onClick.AddListener(OnPressedPerfectNegotiationButton);
+            buttonVideoSendReceive.onClick.AddListener(OnPressedVideoSendReceiveButton);
         }
 
         private void OnChangeHWCodec(bool enable)
@@ -122,6 +132,11 @@ namespace Unity.WebRTC.Samples
         private void OnPressedPerfectNegotiationButton()
         {
             SceneManager.LoadScene("PerfectNegotiation", LoadSceneMode.Single);
+        }
+
+        private void OnPressedVideoSendReceiveButton()
+        {
+            SceneManager.LoadScene("VideoSendReceive", LoadSceneMode.Single);
         }
     }
 }
