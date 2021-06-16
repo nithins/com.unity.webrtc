@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using Unity.WebRTC;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,12 +13,25 @@ public class TestWebCam : MonoBehaviour
     [SerializeField] private RawImage sourceImage;
 
     private WebCamTexture webCamTexture;
+    private VideoStreamTrack videoStreamTrack;
 
     private void Awake()
     {
+        WebRTC.Initialize(EncoderType.Software);
         callButton.onClick.AddListener(Call);
         hangUpButton.onClick.AddListener(HangUp);
         webCamLListDropdown.options = WebCamTexture.devices.Select(x => new Dropdown.OptionData(x.name)).ToList();
+    }
+
+    private void Start()
+    {
+        return;
+        StartCoroutine(WebRTC.Update());
+    }
+
+    private void OnDestroy()
+    {
+        WebRTC.Dispose();
     }
 
     void Call()
@@ -45,6 +58,8 @@ public class TestWebCam : MonoBehaviour
         webCamTexture = new WebCamTexture(userCameraDevice.name, 1280, 720, 30);
         webCamTexture.Play();
         yield return new WaitUntil(() => webCamTexture.didUpdateThisFrame);
+
+        videoStreamTrack = new VideoStreamTrack(webCamTexture);
         sourceImage.texture = webCamTexture;
     }
 
@@ -56,6 +71,8 @@ public class TestWebCam : MonoBehaviour
             webCamTexture = null;
         }
 
+        videoStreamTrack.Dispose();
+        videoStreamTrack = null;
         sourceImage.texture = null;
     }
 }
