@@ -181,10 +181,12 @@ namespace Unity.WebRTC
             buttonPause.gameObject.SetActive(true);
         }
 
+        AudioStreamTrack _receiveTrack;
+
         void OnAddTrack(MediaStreamTrackEvent e)
         {
-            var track = e.Track as AudioStreamTrack;
-            track.OnAudioReceived += OnAudioReceived;
+            _receiveTrack = e.Track as AudioStreamTrack;
+            _receiveTrack.OnAudioReceived += OnAudioReceived;
         }
 
         void OnAudioReceived(AudioClip renderer)
@@ -192,6 +194,8 @@ namespace Unity.WebRTC
             outputAudioSource.clip = renderer;
             outputAudioSource.loop = true;
             outputAudioSource.Play();
+            _receiveTrack.OnAudioReceived -= OnAudioReceived;
+            _receiveTrack = null;
         }
 
         void OnHangUp()
@@ -199,7 +203,8 @@ namespace Unity.WebRTC
             Microphone.End(m_deviceName);
             m_clipInput = null;
 
-            m_audioTrack?.Dispose();
+            m_audioTrack = null;
+            //m_audioTrack?.Dispose();
             _receiveStream?.Dispose();
             _sendStream?.Dispose();
             _pc1?.Dispose();
@@ -217,6 +222,8 @@ namespace Unity.WebRTC
             buttonPause.gameObject.SetActive(true);
 
             dropdownSpeakerMode.interactable = true;
+
+            GC.Collect();
         }
 
         void OnDeviceChanged(int value)

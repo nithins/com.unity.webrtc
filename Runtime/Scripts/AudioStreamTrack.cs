@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -98,8 +98,6 @@ namespace Unity.WebRTC
             }
         }
 
-        internal static List<AudioStreamTrack> tracks = new List<AudioStreamTrack>();
-
         readonly int _sampleRate = 0;
         readonly AudioSourceRead _audioSourceRead;
 
@@ -132,7 +130,6 @@ namespace Unity.WebRTC
 
         internal AudioStreamTrack(IntPtr ptr) : base(ptr)
         {
-            tracks.Add(this);
             WebRTC.Context.AudioTrackRegisterAudioReceiveCallback(self, OnAudioReceive);
         }
 
@@ -141,6 +138,8 @@ namespace Unity.WebRTC
         /// </summary>
         public override void Dispose()
         {
+            Debug.LogWarning("Dispose");
+
             if (this.disposed)
             {
                 return;
@@ -148,7 +147,6 @@ namespace Unity.WebRTC
 
             if (self != IntPtr.Zero && !WebRTC.Context.IsNull)
             {
-                tracks.Remove(this);
                 if(_audioSourceRead != null)
                     Object.Destroy(_audioSourceRead);
                 _streamRenderer?.Dispose();
@@ -162,9 +160,19 @@ namespace Unity.WebRTC
             GC.SuppressFinalize(this);
         }
 
-        private void OnSendAudio(float[] data, int channels)
+        public void GetData(NativeArray<float> data)
+        {
+
+        }
+
+        public void SetData(NativeArray<float> data, int channels)
         {
             NativeMethods.ProcessAudio(self, data, _sampleRate, channels, data.Length);
+        }
+
+        private void OnSendAudio(float[] data, int channels)
+        {
+            SetData();
         }
 
         private void OnAudioReceivedInternal(float[] audioData, int sampleRate, int channels, int numOfFrames)

@@ -407,20 +407,17 @@ namespace Unity.WebRTC
                 // Wait until all frame rendering is done
                 yield return new WaitForEndOfFrame();
                 {
-                    lock (VideoStreamTrack.s_lockTracks)
+                    foreach (var reference in VideoStreamTrack.s_tracks.Values)
                     {
-                        foreach (var reference in VideoStreamTrack.s_tracks.Values)
+                        if (!reference.TryGetTarget(out var track))
+                            continue;
+                        if (track.IsEncoderInitialized)
                         {
-                            if (!reference.TryGetTarget(out var track))
-                                continue;
-                            if (track.IsEncoderInitialized)
-                            {
-                                track.Update();
-                            }
-                            else if (track.IsDecoderInitialized)
-                            {
-                                track.UpdateReceiveTexture();
-                            }
+                            track.Update();
+                        }
+                        else if (track.IsDecoderInitialized)
+                        {
+                            track.UpdateReceiveTexture();
                         }
                     }
                 }

@@ -99,7 +99,7 @@ namespace Unity.WebRTC
             {
                 // Dispose of MediaStreamTrack when disposing of RTCRtpReceiver.
                 // On the other hand, do not dispose a track when disposing of RTCRtpSender.
-                transceiver.Receiver?.Track?.Dispose();
+                //transceiver.Receiver?.Track?.Dispose();
 
                 transceiver.Receiver?.Dispose();
                 transceiver.Sender?.Dispose();
