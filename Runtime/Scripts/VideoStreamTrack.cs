@@ -138,7 +138,7 @@ namespace Unity.WebRTC
             WebRTC.Context.SetVideoEncoderParameter(GetSelfOrThrow(), width, height, format, texturePtr);
             WebRTC.Context.InitializeEncoder(GetSelfOrThrow());
 
-            if(s_tracks.TryAdd(self, new WeakReference<VideoStreamTrack>(this)))
+            if(!s_tracks.TryAdd(self, new WeakReference<VideoStreamTrack>(this)))
                 throw new InvalidOperationException();
         }
 
@@ -148,7 +148,7 @@ namespace Unity.WebRTC
         /// <param name="sourceTrack"></param>
         internal VideoStreamTrack(IntPtr sourceTrack) : base(sourceTrack)
         {
-            if (s_tracks.TryAdd(self, new WeakReference<VideoStreamTrack>(this)))
+            if (!s_tracks.TryAdd(self, new WeakReference<VideoStreamTrack>(this)))
                 throw new InvalidOperationException();
         }
 
@@ -175,7 +175,8 @@ namespace Unity.WebRTC
                     UnityEngine.Object.DestroyImmediate(m_sourceTexture);
                 }
 
-                s_tracks.TryRemove(self, out var value);
+                if(!s_tracks.TryRemove(self, out var value))
+                    Debug.LogError("Invalid Operation");
                 WebRTC.Context.DeleteMediaStreamTrack(self);
                 WebRTC.Table.Remove(self);
                 self = IntPtr.Zero;

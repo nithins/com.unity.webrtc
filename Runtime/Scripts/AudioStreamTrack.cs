@@ -109,7 +109,6 @@ namespace Unity.WebRTC
             }
         }
 
-        readonly int _sampleRate = 0;
         readonly AudioSourceRead _audioSourceRead;
 
         private AudioStreamRenderer _streamRenderer;
@@ -136,7 +135,6 @@ namespace Unity.WebRTC
             _audioSourceRead = source.gameObject.AddComponent<AudioSourceRead>();
             _audioSourceRead.hideFlags = HideFlags.HideInHierarchy;
             _audioSourceRead.onAudioRead += SetData;
-            _sampleRate = Source.clip.frequency;
         }
 
         internal AudioStreamTrack(IntPtr ptr) : base(ptr)
@@ -177,12 +175,12 @@ namespace Unity.WebRTC
 
         }
 
-        public void SetData(ref NativeArray<float>.ReadOnly nativeArray, int channels)
+        public void SetData(ref NativeArray<float>.ReadOnly nativeArray, int channels, int sampleRate)
         {
             unsafe
             {
                 void* ptr = nativeArray.GetUnsafeReadOnlyPtr();
-                NativeMethods.ProcessAudio(self, (IntPtr)ptr, _sampleRate, channels, nativeArray.Length);
+                NativeMethods.ProcessAudio(self, (IntPtr)ptr, sampleRate, channels, nativeArray.Length);
             }
         }
 
@@ -191,12 +189,12 @@ namespace Unity.WebRTC
         /// </summary>
         /// <param name="nativeSlice"></param>
         /// <param name="channels"></param>
-        public void SetData(NativeSlice<float> nativeSlice, int channels)
+        public void SetData(NativeSlice<float> nativeSlice, int channels, int sampleRate)
         {
             unsafe
             {
                 void* ptr = nativeSlice.GetUnsafeReadOnlyPtr();
-                NativeMethods.ProcessAudio(self, (IntPtr)ptr, _sampleRate, channels, nativeSlice.Length);
+                NativeMethods.ProcessAudio(self, (IntPtr)ptr, sampleRate, channels, nativeSlice.Length);
             }
         }
 
@@ -205,11 +203,11 @@ namespace Unity.WebRTC
         /// </summary>
         /// <param name="array"></param>
         /// <param name="channels"></param>
-        public void SetData(float[] array, int channels)
+        public void SetData(float[] array, int channels, int sampleRate)
         {
             NativeArray<float> nativeArray = new NativeArray<float>(array, Allocator.Temp);
             var readonlyNativeArray = nativeArray.AsReadOnly();
-            SetData(ref readonlyNativeArray, channels);
+            SetData(ref readonlyNativeArray, channels, sampleRate);
             nativeArray.Dispose();
         }
 
