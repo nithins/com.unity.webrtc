@@ -180,6 +180,8 @@ namespace Unity.WebRTC
                 WebRTC.Context.DeleteMediaStreamTrack(self);
                 WebRTC.Table.Remove(self);
                 self = IntPtr.Zero;
+
+                Debug.LogWarning("VideoStreamTrack.Dispose end");
             }
 
             this.disposed = true;
@@ -258,6 +260,7 @@ namespace Unity.WebRTC
                 IntPtr trackPtr = track.GetSelfOrThrow();
                 if (trackPtr != IntPtr.Zero)
                 {
+                    Debug.Log("NativeMethods.VideoTrackRemoveSink");
                     NativeMethods.VideoTrackRemoveSink(trackPtr, self);
                 }
 

@@ -148,7 +148,7 @@ namespace Unity.WebRTC
         /// </summary>
         public override void Dispose()
         {
-            Debug.Log("Dispose");
+            Debug.LogWarning("Dispose");
 
             if (this.disposed)
             {
@@ -157,17 +157,21 @@ namespace Unity.WebRTC
 
             if (self != IntPtr.Zero && !WebRTC.Context.IsNull)
             {
-                if(_audioSourceRead != null)
+                Debug.LogWarning("Dispose 0");
+                if (_audioSourceRead != null)
                     Object.Destroy(_audioSourceRead);
                 _streamRenderer?.Dispose();
                 WebRTC.Context.AudioTrackUnregisterAudioReceiveCallback(self);
                 WebRTC.Context.DeleteMediaStreamTrack(self);
                 WebRTC.Table.Remove(self);
                 self = IntPtr.Zero;
+                Debug.LogWarning("Dispose 1");
             }
 
             this.disposed = true;
             GC.SuppressFinalize(this);
+            Debug.LogWarning("Dispose 2");
+
         }
 
         public void GetData(NativeArray<float> data)

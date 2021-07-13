@@ -57,7 +57,6 @@ namespace Unity.WebRTC.RuntimeTest
             {
                 NativeArray<float> nativeArray = new NativeArray<float>(2048, Allocator.Temp);
                 renderer.SetData(ref nativeArray);
-                nativeArray.Dispose();
             }
             renderer.Dispose();
         }

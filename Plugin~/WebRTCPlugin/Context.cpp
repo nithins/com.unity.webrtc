@@ -385,7 +385,11 @@ namespace webrtc
 
     void Context::StopMediaStreamTrack(webrtc::MediaStreamTrackInterface* track)
     {
-        // todo:(kazuki)
+        if (track->kind() == MediaStreamTrackInterface::kAudioKind)
+        {
+            AudioTrackInterface* audioTrack = static_cast<AudioTrackInterface*>(track);
+            UnregisterAudioReceiveCallback(audioTrack);
+        }
     }
 
     AudioTrackInterface* Context::CreateAudioTrack(const std::string& label)

@@ -94,6 +94,7 @@ namespace webrtc
 
     void PeerConnectionObject::OnRemoveTrack(rtc::scoped_refptr<RtpReceiverInterface> receiver)
     {
+        RTC_LOG(LS_INFO) << "PeerConnectionObject::OnRemoveTrack:" << receiver->track()->kind();
         if (onRemoveTrack != nullptr)
         {
             onRemoveTrack(this, receiver.get());
