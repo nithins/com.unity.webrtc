@@ -125,7 +125,7 @@ namespace Unity.WebRTC
 
             _audioSourceRead = source.gameObject.AddComponent<AudioSourceRead>();
             _audioSourceRead.hideFlags = HideFlags.HideInHierarchy;
-            _audioSourceRead.onAudioRead += OnSendAudio;
+            _audioSourceRead.onAudioRead += SetData;
             _sampleRate = Source.clip.frequency;
         }
 
@@ -166,21 +166,29 @@ namespace Unity.WebRTC
 
         }
 
-        //public void SetData(NativeArray<float>.ReadOnly nativeArray, int channels)
-        //{
-        //    unsafe
-        //    {
-        //        void* ptr = nativeArray.GetUnsafeReadOnlyPtr();
-        //        NativeMethods.ProcessAudio(self, (IntPtr)ptr, _sampleRate, channels, nativeArray.Length);
-        //    }
-        //}
-
-        private void OnSendAudio(float[] data, int channels)
+        public void SetData(NativeArray<float>.ReadOnly nativeArray, int channels)
         {
-            //NativeArray<float> nativeArray = new NativeArray<float>(data, Allocator.Temp);
-            //SetData(nativeArray.AsReadOnly(), channels);
-            //nativeArray.Dispose();
-            NativeMethods.ProcessAudio(self, data, _sampleRate, channels, data.Length);
+            unsafe
+            {
+                void* ptr = nativeArray.GetUnsafeReadOnlyPtr();
+                NativeMethods.ProcessAudio(self, (IntPtr)ptr, _sampleRate, channels, nativeArray.Length);
+            }
+        }
+
+        public void SetData(NativeSlice<float> nativeSlice, int channels)
+        {
+            unsafe
+            {
+                void* ptr = nativeSlice.GetUnsafeReadOnlyPtr();
+                NativeMethods.ProcessAudio(self, (IntPtr)ptr, _sampleRate, channels, nativeSlice.Length);
+            }
+        }
+
+        public void SetData(float[] data, int channels)
+        {
+            NativeArray<float> nativeArray = new NativeArray<float>(data, Allocator.Temp);
+            SetData(nativeArray.AsReadOnly(), channels);
+            nativeArray.Dispose();
         }
 
         private void OnAudioReceivedInternal(float[] audioData, int sampleRate, int channels, int numOfFrames)
