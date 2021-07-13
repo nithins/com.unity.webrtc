@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -165,14 +166,21 @@ namespace Unity.WebRTC
 
         }
 
-        public void SetData(NativeArray<float> data, int channels)
-        {
-            NativeMethods.ProcessAudio(self, data, _sampleRate, channels, data.Length);
-        }
+        //public void SetData(NativeArray<float>.ReadOnly nativeArray, int channels)
+        //{
+        //    unsafe
+        //    {
+        //        void* ptr = nativeArray.GetUnsafeReadOnlyPtr();
+        //        NativeMethods.ProcessAudio(self, (IntPtr)ptr, _sampleRate, channels, nativeArray.Length);
+        //    }
+        //}
 
         private void OnSendAudio(float[] data, int channels)
         {
-            SetData();
+            //NativeArray<float> nativeArray = new NativeArray<float>(data, Allocator.Temp);
+            //SetData(nativeArray.AsReadOnly(), channels);
+            //nativeArray.Dispose();
+            NativeMethods.ProcessAudio(self, data, _sampleRate, channels, data.Length);
         }
 
         private void OnAudioReceivedInternal(float[] audioData, int sampleRate, int channels, int numOfFrames)
