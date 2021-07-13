@@ -10,7 +10,13 @@ namespace Unity.WebRTC
     /// 
     /// </summary>
     /// <param name="renderer"></param>
-    public delegate void OnAudioReceived(AudioClip renderer);
+    public delegate void OnAudioReceived(ref NativeArray<float> nativeArray, int sampleRate, int numOfChannels, int numOfFrames);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="clip"></param>
+    public delegate void OnAudioClipCreated(AudioClip clip);
 
     /// <summary>
     /// 
@@ -21,6 +27,12 @@ namespace Unity.WebRTC
         /// 
         /// </summary>
         public event OnAudioReceived OnAudioReceived;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public event OnAudioClipCreated OnAudioClipCreated;
+
 
         /// <summary>
         /// 
@@ -68,7 +80,7 @@ namespace Unity.WebRTC
                 m_clip = null;
             }
 
-            internal void SetData(float[] data)
+            internal void SetData(ref NativeArray<float> data)
             {
                 int length = data.Length / m_channel;
 
@@ -78,18 +90,16 @@ namespace Unity.WebRTC
                     length = m_clip.samples - m_position;
 
                     // Split two arrays from original data
-                    float[] _data = new float[length * m_channel];
-                    Buffer.BlockCopy(data, 0, _data, 0, length * m_channel);
-                    float[] _data2 = new float[remain * m_channel];
-                    Buffer.BlockCopy(data, length * m_channel, _data2, 0, remain * m_channel);
+                    NativeArray<float> _data = data.GetSubArray(0, length * m_channel);
+                    NativeArray<float> _data2 = data.GetSubArray(length * m_channel, remain * m_channel);
 
-                    // push the split array to the audio buffer
-                    SetData(_data);
+                    //    // push the split array to the audio buffer
+                    SetData(ref _data);
 
                     data = _data2;
                     length = remain;
                 }
-                m_clip.SetData(data, m_position);
+                m_clip.SetData(data.ToArray(), m_position);
                 m_position += length;
 
                 if (m_position == m_clip.samples)
@@ -131,7 +141,8 @@ namespace Unity.WebRTC
 
         internal AudioStreamTrack(IntPtr ptr) : base(ptr)
         {
-            WebRTC.Context.AudioTrackRegisterAudioReceiveCallback(self, OnAudioReceive);
+            WebRTC.Context.AudioTrackRegisterAudioReceiveCallback(self, NativeOnAudioReceive);
+            OnAudioReceived += OnAudioReceivedInternal;
         }
 
         /// <summary>
@@ -139,7 +150,7 @@ namespace Unity.WebRTC
         /// </summary>
         public override void Dispose()
         {
-            Debug.LogWarning("Dispose");
+            Debug.Log("Dispose");
 
             if (this.disposed)
             {
@@ -166,7 +177,7 @@ namespace Unity.WebRTC
 
         }
 
-        public void SetData(NativeArray<float>.ReadOnly nativeArray, int channels)
+        public void SetData(ref NativeArray<float>.ReadOnly nativeArray, int channels)
         {
             unsafe
             {
@@ -175,6 +186,11 @@ namespace Unity.WebRTC
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nativeSlice"></param>
+        /// <param name="channels"></param>
         public void SetData(NativeSlice<float> nativeSlice, int channels)
         {
             unsafe
@@ -184,33 +200,46 @@ namespace Unity.WebRTC
             }
         }
 
-        public void SetData(float[] data, int channels)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="channels"></param>
+        public void SetData(float[] array, int channels)
         {
-            NativeArray<float> nativeArray = new NativeArray<float>(data, Allocator.Temp);
-            SetData(nativeArray.AsReadOnly(), channels);
+            NativeArray<float> nativeArray = new NativeArray<float>(array, Allocator.Temp);
+            var readonlyNativeArray = nativeArray.AsReadOnly();
+            SetData(ref readonlyNativeArray, channels);
             nativeArray.Dispose();
         }
 
-        private void OnAudioReceivedInternal(float[] audioData, int sampleRate, int channels, int numOfFrames)
+        private void OnAudioReceivedInternal(ref NativeArray<float> audioData, int sampleRate, int channels, int numOfFrames)
         {
             if (_streamRenderer == null)
             {
                 _streamRenderer = new AudioStreamRenderer(this.Id, sampleRate, channels);
 
-                OnAudioReceived?.Invoke(_streamRenderer.clip);
+                OnAudioClipCreated?.Invoke(_streamRenderer.clip);
             }
-            _streamRenderer.SetData(audioData);
+            _streamRenderer.SetData(ref audioData);
         }
 
         [AOT.MonoPInvokeCallback(typeof(DelegateAudioReceive))]
-        static void OnAudioReceive(
-            IntPtr ptrTrack, float[] audioData, int size, int sampleRate, int numOfChannels, int numOfFrames)
+        static void NativeOnAudioReceive(
+            IntPtr ptrTrack, IntPtr audioData, int size, int sampleRate, int numOfChannels, int numOfFrames)
         {
             WebRTC.Sync(ptrTrack, () =>
             {
                 if (WebRTC.Table[ptrTrack] is AudioStreamTrack track)
                 {
-                    track.OnAudioReceivedInternal(audioData, sampleRate, numOfChannels, numOfFrames);
+                    unsafe
+                    {
+                        NativeArray<float> nativeArray =
+                            NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(audioData.ToPointer(),
+                                size, Allocator.Temp);
+                        NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.Create());
+                        track.OnAudioReceived?.Invoke(ref nativeArray, sampleRate, numOfChannels, numOfFrames);
+                    }
                 }
             });
         }
