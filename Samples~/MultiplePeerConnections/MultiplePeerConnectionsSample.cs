@@ -95,7 +95,7 @@ namespace Unity.WebRTC.Samples
 
                 if (e.Track is AudioStreamTrack audioTrack)
                 {
-                    audioTrack.OnAudioReceived += clip =>
+                    audioTrack.OnAudioClipCreated += clip =>
                     {
                         receiveAudio1.clip = clip;
                         receiveAudio1.loop = true;
@@ -118,7 +118,7 @@ namespace Unity.WebRTC.Samples
 
                 if (e.Track is AudioStreamTrack audioTrack)
                 {
-                    audioTrack.OnAudioReceived += clip =>
+                    audioTrack.OnAudioClipCreated += clip =>
                     {
                         receiveAudio2.clip = clip;
                         receiveAudio2.loop = true;
