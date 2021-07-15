@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -161,19 +160,7 @@ namespace Unity.WebRTC
 
             if (self != IntPtr.Zero && !WebRTC.Context.IsNull)
             {
-                if (IsEncoderInitialized)
-                {
-                    WebRTC.Context.FinalizeEncoder(self);
-                    if (RenderTexture.active == m_destTexture)
-                        RenderTexture.active = null;
-                    UnityEngine.Object.DestroyImmediate(m_destTexture);
-                }
-
-                if (IsDecoderInitialized)
-                {
-                    m_renderer.Dispose();
-                    UnityEngine.Object.DestroyImmediate(m_sourceTexture);
-                }
+                Stop();
 
                 s_tracks.TryRemove(self, out var value);
                 WebRTC.Context.DeleteMediaStreamTrack(self);
@@ -183,6 +170,23 @@ namespace Unity.WebRTC
 
             this.disposed = true;
             GC.SuppressFinalize(this);
+        }
+
+        public override void Stop()
+        {
+            if (IsEncoderInitialized)
+            {
+                WebRTC.Context.FinalizeEncoder(self);
+                if (RenderTexture.active == m_destTexture)
+                    RenderTexture.active = null;
+                UnityEngine.Object.DestroyImmediate(m_destTexture);
+            }
+
+            if (IsDecoderInitialized)
+            {
+                m_renderer.Dispose();
+                UnityEngine.Object.DestroyImmediate(m_sourceTexture);
+            }
         }
     }
 

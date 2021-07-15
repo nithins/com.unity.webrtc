@@ -381,11 +381,6 @@ namespace webrtc
         return track;
     }
 
-    void Context::StopMediaStreamTrack(webrtc::MediaStreamTrackInterface* track)
-    {
-        // todo:(kazuki)
-    }
-
     AudioTrackInterface* Context::CreateAudioTrack(const std::string& label)
     {
         //avoid optimization specially for voice

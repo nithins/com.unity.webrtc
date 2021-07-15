@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Unity.WebRTC
 {
-    public class MediaStreamTrack : IDisposable
+    public abstract class MediaStreamTrack : IDisposable
     {
         protected IntPtr self;
         protected bool disposed;
@@ -52,16 +52,10 @@ namespace Unity.WebRTC
             this.Dispose();
         }
 
-        public virtual void Dispose()
-        {
-            throw new NotImplementedException("Must to implements on the inherited class");
-        }
+        public abstract void Dispose();
 
         //Disassociate track from its source(video or audio), not for destroying the track
-        public void Stop()
-        {
-            WebRTC.Context.StopMediaStreamTrack(GetSelfOrThrow());
-        }
+        public abstract void Stop();
 
         internal static MediaStreamTrack Create(IntPtr ptr)
         {

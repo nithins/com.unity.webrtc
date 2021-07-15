@@ -144,10 +144,7 @@ namespace Unity.WebRTC
 
             if (self != IntPtr.Zero && !WebRTC.Context.IsNull)
             {
-                if(_audioSourceRead != null)
-                    Object.Destroy(_audioSourceRead);
-                _streamRenderer?.Dispose();
-                WebRTC.Context.AudioTrackUnregisterAudioReceiveCallback(self);
+                Stop();
                 WebRTC.Context.DeleteMediaStreamTrack(self);
                 WebRTC.Table.Remove(self);
                 self = IntPtr.Zero;
@@ -160,6 +157,19 @@ namespace Unity.WebRTC
         /// <summary>
         /// 
         /// </summary>
+        public override void Stop()
+        {
+
+            if (_audioSourceRead != null)
+                Object.Destroy(_audioSourceRead);
+            _streamRenderer?.Dispose();
+            WebRTC.Context.AudioTrackUnregisterAudioReceiveCallback(GetSelfOrThrow());
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="nativeArray"></param>
         /// <param name="channels"></param>
         /// <param name="sampleRate"></param>
@@ -168,7 +178,7 @@ namespace Unity.WebRTC
             unsafe
             {
                 void* ptr = nativeArray.GetUnsafeReadOnlyPtr();
-                NativeMethods.ProcessAudio(self, (IntPtr)ptr, sampleRate, channels, nativeArray.Length);
+                NativeMethods.AudioTrackProcessAudio(self, (IntPtr)ptr, sampleRate, channels, nativeArray.Length);
             }
         }
 
@@ -182,7 +192,7 @@ namespace Unity.WebRTC
             unsafe
             {
                 void* ptr = nativeSlice.GetUnsafeReadOnlyPtr();
-                NativeMethods.ProcessAudio(self, (IntPtr)ptr, sampleRate, channels, nativeSlice.Length);
+                NativeMethods.AudioTrackProcessAudio(self, (IntPtr)ptr, sampleRate, channels, nativeSlice.Length);
             }
         }
 

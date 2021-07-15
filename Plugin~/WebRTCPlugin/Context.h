@@ -76,7 +76,6 @@ namespace webrtc
         webrtc::VideoTrackInterface* CreateVideoTrack(const std::string& label);
         webrtc::AudioTrackInterface* CreateAudioTrack(const std::string& label);
         void DeleteMediaStreamTrack(webrtc::MediaStreamTrackInterface* track);
-        void StopMediaStreamTrack(webrtc::MediaStreamTrackInterface* track);
         UnityVideoTrackSource* GetVideoSource(const MediaStreamTrackInterface* track);
 
         void RegisterAudioReceiveCallback(

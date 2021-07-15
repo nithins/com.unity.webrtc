@@ -286,12 +286,7 @@ extern "C"
         context->DeleteMediaStreamTrack(track);
     }
 
-    UNITY_INTERFACE_EXPORT void ContextStopMediaStreamTrack(Context* context, ::webrtc::MediaStreamTrackInterface* track)
-    {
-        context->StopMediaStreamTrack(track);
-    }
-
-    UNITY_INTERFACE_EXPORT::webrtc::MediaStreamTrackInterface* ContextCreateAudioTrack(Context* context, const char* label)
+    UNITY_INTERFACE_EXPORT ::webrtc::MediaStreamTrackInterface* ContextCreateAudioTrack(Context* context, const char* label)
     {
         return context->CreateAudioTrack(label);
     }
@@ -1324,7 +1319,7 @@ extern "C"
         ContextManager::GetInstance()->curContext = context;
     }
 
-    UNITY_INTERFACE_EXPORT void ProcessAudio(
+    UNITY_INTERFACE_EXPORT void AudioTrackProcessAudio(
         AudioTrackInterface* track,
         float* audio_data,
         int32 sample_rate,
