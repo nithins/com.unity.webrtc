@@ -39,7 +39,7 @@ class PerfectNegotiationSample : MonoBehaviour
 
     private void Awake()
     {
-        WebRTC.Initialize(WebRTCSettings.EncoderType, WebRTCSettings.LimitTextureSize);
+        WebRTC.Initialize(WebRTCSettings.EncoderType, WebRTCSettings.LimitTextureSize, WebRTCSettings.EnableNativeLog);
     }
 
     private void OnDestroy()

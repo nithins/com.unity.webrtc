@@ -40,7 +40,7 @@ class PeerConnectionSample : MonoBehaviour
 
     private void Awake()
     {
-        WebRTC.Initialize(WebRTCSettings.EncoderType, WebRTCSettings.LimitTextureSize);
+        WebRTC.Initialize(WebRTCSettings.EncoderType, WebRTCSettings.LimitTextureSize, WebRTCSettings.EnableNativeLog);
         startButton.onClick.AddListener(OnStart);
         callButton.onClick.AddListener(Call);
         restartButton.onClick.AddListener(RestartIce);

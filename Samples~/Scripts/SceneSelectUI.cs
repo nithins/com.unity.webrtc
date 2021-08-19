@@ -8,6 +8,7 @@ namespace Unity.WebRTC.Samples
     {
         private static bool s_enableHWCodec = false;
         private static bool s_limitTextureSize = true;
+        private static bool s_enableNativeLog = false;
 
         public static bool EnableHWCodec
         {
@@ -21,6 +22,12 @@ namespace Unity.WebRTC.Samples
             set { s_limitTextureSize = value; }
         }
 
+        public static bool EnableNativeLog
+        {
+            get { return s_enableNativeLog; }
+            set { s_enableNativeLog = value; }
+        }
+
         public static EncoderType EncoderType
         {
             get { return s_enableHWCodec ? EncoderType.Hardware : EncoderType.Software; }
@@ -31,6 +38,7 @@ namespace Unity.WebRTC.Samples
     {
         [SerializeField] private Toggle toggleEnableHWCodec;
         [SerializeField] private Toggle toggleLimitTextureSize;
+        [SerializeField] private Toggle toggleEnableNativeLog;
         [SerializeField] private Button buttonPeerConnection;
         [SerializeField] private Button buttonDataChannel;
         [SerializeField] private Button buttonMediaStream;
@@ -50,8 +58,10 @@ namespace Unity.WebRTC.Samples
         {
             toggleEnableHWCodec.isOn = WebRTCSettings.EnableHWCodec;
             toggleLimitTextureSize.isOn = WebRTCSettings.LimitTextureSize;
+            toggleEnableNativeLog.isOn = WebRTCSettings.EnableNativeLog;
             toggleEnableHWCodec.onValueChanged.AddListener(OnChangeHWCodec);
             toggleLimitTextureSize.onValueChanged.AddListener(OnChangeLimitTextureSize);
+            toggleEnableNativeLog.onValueChanged.AddListener(OnChangeEnableNativeLog);
 
             buttonPeerConnection.onClick.AddListener(OnPressedPeerConnectionButton);
             buttonDataChannel.onClick.AddListener(OnPressedDataChannelButton);
@@ -77,6 +87,11 @@ namespace Unity.WebRTC.Samples
         private void OnChangeLimitTextureSize(bool enable)
         {
             WebRTCSettings.LimitTextureSize = enable;
+        }
+
+        private void OnChangeEnableNativeLog(bool enable)
+        {
+            WebRTCSettings.EnableNativeLog = enable;
         }
 
         private void OnPressedPeerConnectionButton()
