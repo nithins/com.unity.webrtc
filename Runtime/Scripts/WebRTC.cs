@@ -347,16 +347,16 @@ namespace Unity.WebRTC
         /// </summary>
         /// <param name="type"></param>
         /// <param name="limitTextureSize"></param>
-        public static void Initialize(EncoderType type = EncoderType.Hardware, bool limitTextureSize = true)
+        public static void Initialize(EncoderType type = EncoderType.Hardware, bool limitTextureSize = true, SynchronizationContext syncContext = null)
         {
             if (s_context != null)
                 throw new InvalidOperationException("Already initialized WebRTC.");
 
-            Initialize(type, limitTextureSize, false);
+            Initialize(type, syncContext, limitTextureSize, false);
         }
 
 
-        internal static void Initialize(EncoderType type, bool limitTextureSize, bool forTest)
+        internal static void Initialize(EncoderType type, SynchronizationContext syncContext, bool limitTextureSize, bool forTest)
         {
             // todo(kazuki): Add this event to avoid crash caused by hot-reload.
             // Dispose of all before reloading assembly.
@@ -389,7 +389,11 @@ namespace Unity.WebRTC
 #endif
             s_context = Context.Create(encoderType:type, forTest:forTest);
             NativeMethods.SetCurrentContext(s_context.self);
-            s_syncContext = SynchronizationContext.Current;
+            if(syncContext == null)
+            {
+                syncContext = SynchronizationContext.Current;
+            }
+            s_syncContext = syncContext;
             var flipShader = Resources.Load<Shader>("Flip");
             if (flipShader != null)
             {
