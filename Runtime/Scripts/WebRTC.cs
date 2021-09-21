@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Runtime.CompilerServices;
-using System.IO;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+using NativeMethods = Unity.WebRTC.WebGLExtension.NativeMethods;
+#endif
 
 
 namespace Unity.WebRTC

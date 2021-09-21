@@ -104,17 +104,17 @@ namespace Unity.WebRTC
             IntPtr ptr, ref RTCSessionDescription desc)
         {
             IntPtr ptrError = IntPtr.Zero;
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
             RTCErrorType errorType = NativeMethods.PeerConnectionSetLocalDescription(
                 self, ptr, ref desc, ref ptrError);
             string message = ptrError != IntPtr.Zero ? ptrError.AsAnsiStringWithFreeMem() : null;
             return new RTCError { errorType = errorType, message = message};
-#else
-            RTCErrorType errorType = NativeMethods.PeerConnectionSetLocalDescription(
-                self, ptr, desc.type, desc.sdp);
-            // TODO
-            return new RTCError { errorType = errorType, message = "error" };
-#endif
+//#else
+//            RTCErrorType errorType = NativeMethods.PeerConnectionSetLocalDescription(
+//                self, ptr, desc.type, desc.sdp);
+//            // TODO
+//            return new RTCError { errorType = errorType, message = "error" };
+//#endif
         }
 
         public RTCError PeerConnectionSetLocalDescription(IntPtr ptr)
@@ -134,17 +134,17 @@ namespace Unity.WebRTC
             IntPtr ptr, ref RTCSessionDescription desc)
         {
             IntPtr ptrError = IntPtr.Zero;
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
             RTCErrorType errorType = NativeMethods.PeerConnectionSetRemoteDescription(
                 self, ptr, ref desc, ref ptrError);
             string message = ptrError != IntPtr.Zero ? ptrError.AsAnsiStringWithFreeMem() : null;
             return new RTCError { errorType = errorType, message = message};
-#else
-            RTCErrorType errorType = NativeMethods.PeerConnectionSetRemoteDescription(
-                self, ptr, desc.type, desc.sdp);
-            // TODO
-            return new RTCError { errorType = errorType, message = "error" };
-#endif
+//#else
+//            RTCErrorType errorType = NativeMethods.PeerConnectionSetRemoteDescription(
+//                self, ptr, desc.type, desc.sdp);
+//            // TODO
+//            return new RTCError { errorType = errorType, message = "error" };
+//#endif
         }
 
         public void PeerConnectionRegisterOnSetSessionDescSuccess(IntPtr ptr, DelegateNativePeerConnectionSetSessionDescSuccess callback)
@@ -169,42 +169,42 @@ namespace Unity.WebRTC
 
         public IntPtr PeerConnectionGetReceivers(IntPtr ptr, out ulong length)
         {
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
             return NativeMethods.PeerConnectionGetReceivers(self, ptr, out length);
-#else
-            length = 0;
-            return NativeMethods.PeerConnectionGetReceivers(self, ptr);
-#endif
+//#else
+//            length = 0;
+//            return NativeMethods.PeerConnectionGetReceivers(self, ptr);
+//#endif
         }
 
         public IntPtr PeerConnectionGetSenders(IntPtr ptr, out ulong length)
         {
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
             return NativeMethods.PeerConnectionGetSenders(self, ptr, out length);
-#else
-            length = 0;
-            return NativeMethods.PeerConnectionGetSenders(self, ptr);
-#endif
+//#else
+//            length = 0;
+//            return NativeMethods.PeerConnectionGetSenders(self, ptr);
+//#endif
         }
 
         public IntPtr PeerConnectionGetTransceivers(IntPtr ptr, out ulong length)
         {
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
             return NativeMethods.PeerConnectionGetTransceivers(self, ptr, out length);
-#else
-            length = 0;
-            return NativeMethods.PeerConnectionGetTransceivers(self, ptr);
-#endif
+//#else
+//            length = 0;
+//            return NativeMethods.PeerConnectionGetTransceivers(self, ptr);
+//#endif
         }
 
         public IntPtr CreateDataChannel(IntPtr ptr, string label, ref RTCDataChannelInitInternal options)
         {
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
             return NativeMethods.ContextCreateDataChannel(self, ptr, label, ref options);
-#else
-            var optionsJson = JsonUtility.ToJson(options);
-            return NativeMethods.ContextCreateDataChannel(self, ptr, label, optionsJson);
-#endif
+//#else
+//            var optionsJson = JsonUtility.ToJson(options);
+//            return NativeMethods.ContextCreateDataChannel(self, ptr, label, optionsJson);
+//#endif
         }
 
         public void DeleteDataChannel(IntPtr ptr)
@@ -248,7 +248,7 @@ namespace Unity.WebRTC
             NativeMethods.ContextUnregisterAudioReceiveCallback(self, track);
         }
 
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
         public IntPtr GetRenderEventFunc()
         {
             return NativeMethods.GetRenderEventFunc(self);
@@ -258,7 +258,7 @@ namespace Unity.WebRTC
         {
             return NativeMethods.GetUpdateTextureFunc(self);
         }
-#endif
+//#endif
 
         public IntPtr CreateVideoTrackSource()
         {

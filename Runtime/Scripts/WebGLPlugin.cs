@@ -1,11 +1,10 @@
-// todo::
-// #if UNITY_WEBGL && !UNITY_EDITOR
-#if UNITY_WEBGL
+#if UNITY_WEBGL //&& !UNITY_EDITOR
 
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
-namespace Unity.WebRTC
+namespace Unity.WebRTC.WebGLExtension
 {
 
     //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -16,6 +15,20 @@ namespace Unity.WebRTC
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void DelegateNativeOnTextMessage(IntPtr ptr, IntPtr msg);
+
+    public class MediaStreamConstraints
+    {
+        public bool audio = true;
+        public bool video = true;
+    }
+
+    public static class MediaStreamExtension
+    {
+        public static void AddUserMedia(this MediaStream stream, MediaStreamConstraints constraints)
+        {
+            NativeMethods.MediaStreamAddUserMedia(stream.self, JsonUtility.ToJson(constraints));
+        }
+    }
 
     internal static partial class NativeMethods
     {
@@ -28,6 +41,59 @@ namespace Unity.WebRTC
             for (var i = 0; i < len; i++)
                 ret[i] = new IntPtr(arr[i]);
             return ret;
+        }
+
+        public static RTCErrorType PeerConnectionSetLocalDescription(IntPtr context, IntPtr ptr, ref RTCSessionDescription desc, ref IntPtr error)
+        {
+            // TODO
+            error = IntPtr.Zero;
+            return PeerConnectionSetLocalDescription(context, ptr, desc.type, desc.sdp);
+        }
+
+        public static RTCErrorType PeerConnectionSetRemoteDescription(IntPtr context, IntPtr ptr, ref RTCSessionDescription desc, ref IntPtr error)
+        {
+            // TODO
+            error = IntPtr.Zero;
+            return PeerConnectionSetRemoteDescription(context, ptr, desc.type, desc.sdp);
+        }
+
+        public static IntPtr PeerConnectionGetReceivers(IntPtr context, IntPtr ptr, out ulong length)
+        {
+            length = 0;
+            return PeerConnectionGetReceivers(context, ptr);
+        }
+
+        public static IntPtr PeerConnectionGetSenders(IntPtr context, IntPtr ptr, out ulong length)
+        {
+            length = 0;
+            return PeerConnectionGetSenders(context, ptr);
+        }
+
+        public static IntPtr PeerConnectionGetTransceivers(IntPtr context, IntPtr ptr, out ulong length)
+        {
+            length = 0;
+            return PeerConnectionGetTransceivers(context, ptr);
+        }
+
+        public static IntPtr ContextCreateDataChannel(IntPtr ptr, IntPtr ptrPeer, string label, ref RTCDataChannelInitInternal options)
+        {
+            var optionsJson = JsonUtility.ToJson(options);
+            return ContextCreateDataChannel(ptr, ptrPeer, label, optionsJson);
+        }
+
+        public static void IceCandidateGetCandidate(IntPtr candidate, out CandidateInternal dst)
+        {
+            string json = IceCandidateGetCandidate(candidate);
+            dst = JsonUtility.FromJson<CandidateInternal>(json);
+        }
+
+        // TODO
+        public static IntPtr MediaStreamGetVideoTracks(IntPtr stream, out ulong length)
+        {
+            IntPtr ptr = MediaStreamGetVideoTracks(stream);
+            var array = ptrToIntPtrArray(ptr);
+            length = (ulong)array.Length;
+            return IntPtr.Add(ptr, 4);
         }
 
         //public static void RegisterDebugLog(Action<string> func) { }
