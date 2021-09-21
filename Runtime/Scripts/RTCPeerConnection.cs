@@ -299,11 +299,11 @@ namespace Unity.WebRTC
         internal DelegateSetSessionDescFailure OnSetSessionDescriptionFailure { get; set; }
 
         [AOT.MonoPInvokeCallback(typeof(DelegateNativeOnIceCandidate))]
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
         static void PCOnIceCandidate(IntPtr ptr, string sdp, string sdpMid, int sdpMlineIndex)
-#else
-        static void PCOnIceCandidate(IntPtr ptr, IntPtr iceCandidatePtr, string sdp, string sdpMid, int sdpMlineIndex)
-#endif
+//#else
+//        static void PCOnIceCandidate(IntPtr ptr, IntPtr iceCandidatePtr, string sdp, string sdpMid, int sdpMlineIndex)
+//#endif
         {
             WebRTC.Sync(ptr, () =>
             {
@@ -315,11 +315,11 @@ namespace Unity.WebRTC
                         sdpMid = sdpMid,
                         sdpMLineIndex = sdpMlineIndex
                     };
-#if !UNITY_WEBGL
+//#if !UNITY_WEBGL
                     var candidate = new RTCIceCandidate(options);
-#else
-                    var candidate = new RTCIceCandidate(options, iceCandidatePtr);
-#endif
+//#else
+//                    var candidate = new RTCIceCandidate(options, iceCandidatePtr);
+//#endif
                     connection.OnIceCandidate?.Invoke(candidate);
                 }
             });
