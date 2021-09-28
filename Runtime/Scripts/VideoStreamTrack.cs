@@ -117,11 +117,13 @@ namespace Unity.WebRTC
         /// The track is created with a `source`.
         /// </summary>
         /// <param name="source"></param>
-        public VideoStreamTrack(Texture source)
+        public VideoStreamTrack(Texture source, bool useGpu = true, bool useCpu = true)
             : this(source,
                 CreateRenderTexture(source.width, source.height),
                 source.width,
-                source.height)
+                source.height,
+                useGpu,
+                useCpu)
         {
         }
 
@@ -137,12 +139,13 @@ namespace Unity.WebRTC
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="format"></param>
-        public VideoStreamTrack(IntPtr texturePtr, int width, int height, GraphicsFormat format)
-            : this(Guid.NewGuid().ToString(), new VideoTrackSource())
+        public VideoStreamTrack(
+            IntPtr texturePtr, int width, int height, GraphicsFormat format, bool useGpu = true, bool useCpu = true)
+            : this(Guid.NewGuid().ToString(), new VideoTrackSource(texturePtr, format, useGpu, useCpu))
         {
             WebRTC.ValidateTextureSize(width, height, Application.platform, WebRTC.GetEncoderType());
             WebRTC.ValidateGraphicsFormat(format);
-            WebRTC.Context.SetVideoEncoderParameter(GetSelfOrThrow(), width, height, format, texturePtr);
+            //WebRTC.Context.SetVideoEncoderParameter(GetSelfOrThrow(), width, height, format, texturePtr);
             WebRTC.Context.InitializeEncoder(GetSelfOrThrow());
         }
 
@@ -234,7 +237,8 @@ namespace Unity.WebRTC
 
     internal class VideoTrackSource : RefCountedObject
     {
-        public VideoTrackSource(bool useGpu, bool useCpu) : base(WebRTC.Context.CreateVideoTrackSource(useGpu, useCpu))
+        public VideoTrackSource(IntPtr texturePtr, GraphicsFormat format, bool useGpu, bool useCpu)
+            : base(WebRTC.Context.CreateVideoTrackSource(texturePtr, format, useGpu, useCpu))
         {
             WebRTC.Table.Add(self, this);
         }
