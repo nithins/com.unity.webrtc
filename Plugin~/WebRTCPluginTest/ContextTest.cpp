@@ -43,7 +43,7 @@ protected:
 TEST_P(ContextTest, InitializeAndFinalizeEncoder) {
     const std::unique_ptr<ITexture2D> tex(m_device->CreateDefaultTextureV(width, height, m_textureFormat));
     EXPECT_NE(nullptr, tex);
-    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), GPU_MEMORY | CPU_MEMORY);
+    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), m_device, m_textureFormat, GPU_MEMORY | CPU_MEMORY);
     const auto track = context->CreateVideoTrack("video", source);
 //    EXPECT_TRUE(context->InitializeEncoder(encoder_.get(), track));
     context->RemoveRefPtr(track);
@@ -59,7 +59,7 @@ TEST_P(ContextTest, CreateAndDeleteMediaStream) {
 TEST_P(ContextTest, CreateAndDeleteVideoTrack) {
     const std::unique_ptr<ITexture2D> tex(m_device->CreateDefaultTextureV(width, height, m_textureFormat));
     EXPECT_NE(nullptr, tex.get());
-    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), GPU_MEMORY | CPU_MEMORY);
+    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), m_device, m_textureFormat, GPU_MEMORY | CPU_MEMORY);
     const auto track = context->CreateVideoTrack("video", source);
     EXPECT_NE(nullptr, track);
 //    EXPECT_TRUE(context->InitializeEncoder(encoder_.get(), track));
@@ -89,7 +89,7 @@ TEST_P(ContextTest, AddAndRemoveAudioTrackToMediaStream) {
 TEST_P(ContextTest, AddAndRemoveVideoTrackToMediaStream) {
     const std::unique_ptr<ITexture2D> tex(m_device->CreateDefaultTextureV(width, height, m_textureFormat));
     const auto stream = context->CreateMediaStream("videostream");
-    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), GPU_MEMORY | CPU_MEMORY);
+    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), m_device, m_textureFormat, GPU_MEMORY | CPU_MEMORY);
     const auto track = context->CreateVideoTrack("video", source);
     const auto videoTrack = reinterpret_cast<webrtc::VideoTrackInterface*>(track);
     stream->AddTrack(videoTrack);
@@ -132,7 +132,7 @@ TEST_P(ContextTest, EqualRendererGetById) {
 
 TEST_P(ContextTest, AddAndRemoveVideoRendererToVideoTrack) {
     const std::unique_ptr<ITexture2D> tex(m_device->CreateDefaultTextureV(width, height, m_textureFormat));
-    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), GPU_MEMORY | CPU_MEMORY);
+    const auto source = context->CreateVideoSource(tex->GetNativeTexturePtrV(), m_device, m_textureFormat, GPU_MEMORY | CPU_MEMORY);
     const auto track = context->CreateVideoTrack("video", source);
     const auto renderer = context->CreateVideoRenderer();
     track->AddOrUpdateSink(renderer, rtc::VideoSinkWants());
