@@ -132,46 +132,51 @@ namespace Unity.WebRTC.RuntimeTest
             var peer = new RTCPeerConnection();
 
             var track = new AudioStreamTrack();
-            Assert.AreEqual(0, peer.GetTransceivers().Count());
+            Assert.That(peer.GetTransceivers(), Is.Empty);
             var transceiver = peer.AddTransceiver(track);
-            Assert.NotNull(transceiver);
-            Assert.IsNull(transceiver.CurrentDirection);
+            Assert.That(transceiver, Is.Not.Null);
+            Assert.That(transceiver.Mid, Is.Null);
+            Assert.That(transceiver.CurrentDirection, Is.Null);
             RTCRtpSender sender = transceiver.Sender;
-            Assert.NotNull(sender);
-            Assert.AreEqual(track, sender.Track);
+            Assert.That(sender, Is.Not.Null);
+            Assert.That(track, Is.EqualTo(sender.Track));
 
             RTCRtpSendParameters parameters = sender.GetParameters();
-            Assert.NotNull(parameters);
-            Assert.NotNull(parameters.encodings);
+            Assert.That(parameters, Is.Not.Null);
+            Assert.That(parameters.encodings, Is.Not.Null);
+            Assert.That(parameters.encodings, Is.Not.Empty);
+
             foreach (var encoding in parameters.encodings)
             {
-                Assert.True(encoding.active);
-                Assert.Null(encoding.maxBitrate);
-                Assert.Null(encoding.minBitrate);
-                Assert.Null(encoding.maxFramerate);
-                Assert.Null(encoding.scaleResolutionDownBy);
-                Assert.IsNotEmpty(encoding.rid);
+                Assert.That(encoding.active, Is.True);
+                Assert.That(encoding.maxBitrate, Is.Null);
+                Assert.That(encoding.minBitrate, Is.Null);
+                Assert.That(encoding.maxFramerate, Is.Null);
+                Assert.That(encoding.scaleResolutionDownBy, Is.Null);
+                Assert.That(encoding.rid, Is.Not.Empty);
             }
-            Assert.IsNotEmpty(parameters.transactionId);
-            Assert.AreEqual(1, peer.GetTransceivers().Count());
-            Assert.NotNull(peer.GetTransceivers().First());
-            Assert.NotNull(parameters.codecs);
+            Assert.That(parameters.transactionId, Is.Not.Empty);
+            Assert.That(peer.GetTransceivers(), Has.Count.EqualTo(1));
+            Assert.That(peer.GetTransceivers().First(), Is.Not.Null);
+            Assert.That(parameters.codecs, Is.Not.Null);
+            Assert.That(parameters.codecs, Is.Not.Empty);
             foreach (var codec in parameters.codecs)
             {
-                Assert.NotNull(codec);
-                Assert.NotZero(codec.payloadType);
-                Assert.IsNotEmpty(codec.mimeType);
-                Assert.IsNotEmpty(codec.sdpFmtpLine);
-                Assert.Null(codec.clockRate);
-                Assert.Null(codec.channels);
+                Assert.That(codec, Is.Not.Null);
+                Assert.That(codec.payloadType, Is.Not.Zero);
+                Assert.That(codec.mimeType, Is.Not.Empty);
+                Assert.That(codec.sdpFmtpLine, Is.Not.Empty);
+                Assert.That(codec.clockRate, Is.Null);
+                Assert.That(codec.channels, Is.Null);
             }
-            Assert.NotNull(parameters.rtcp);
-            Assert.NotNull(parameters.headerExtensions);
+            Assert.That(parameters.rtcp, Is.Not.Null);
+            Assert.That(parameters.headerExtensions, Is.Not.Null);
+            Assert.That(parameters.headerExtensions, Is.Not.Empty);
             foreach (var extension in parameters.headerExtensions)
             {
-                Assert.NotNull(extension);
-                Assert.IsNotEmpty(extension.uri);
-                Assert.NotZero(extension.id);
+                Assert.That(extension, Is.Not.Null);
+                Assert.That(extension.uri, Is.Not.Empty);
+                Assert.That(extension.id, Is.Not.Empty);
             }
 
             track.Dispose();
