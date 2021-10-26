@@ -73,9 +73,9 @@
 #define SUPPORT_METAL 1
 #endif
 
-#if UNITY_LINUX || UNITY_WIN
-#define CUDA_PLATFORM 1
-#endif
+// #if UNITY_LINUX || UNITY_WIN
+// #define CUDA_PLATFORM 1
+// #endif
 
 // COM-like Release macro
 #ifndef SAFE_RELEASE
