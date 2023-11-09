@@ -73,13 +73,13 @@ bool D3D12GraphicsDevice::InitV() {
     {
         ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
     }
-    m_isCudaSupport = CUDA_SUCCESS == m_cudaContext.Init(m_d3d12Device);
+    // m_isCudaSupport = CUDA_SUCCESS == m_cudaContext.Init(m_d3d12Device);
     return true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void D3D12GraphicsDevice::ShutdownV() {
-    m_cudaContext.Shutdown();
+    // m_cudaContext.Shutdown();
     SAFE_RELEASE(m_d3d11Device);
     SAFE_RELEASE(m_d3d11Context);
     SAFE_RELEASE(m_copyResourceFence);
