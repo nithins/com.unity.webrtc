@@ -5,9 +5,9 @@
 #include "UnityAudioEncoderFactory.h"
 #include "UnityAudioDecoderFactory.h"
 
-#if defined(UNITY_WIN) || defined(UNITY_LINUX)
-#include "Codec/NvCodec/NvEncoder.h"
-#endif
+// #if defined(UNITY_WIN) || defined(UNITY_LINUX)
+//    #include "Codec/NvCodec/NvEncoder.h"
+// #endif
 
 #include "AudioTrackSinkAdapter.h"
 #include "DummyVideoEncoder.h"

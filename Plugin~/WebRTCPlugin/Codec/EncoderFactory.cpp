@@ -3,17 +3,17 @@
 #include "Context.h"
 #include "EncoderFactory.h"
 
-#if SUPPORT_OPENGL_CORE && CUDA_PLATFORM
-#include "NvCodec/NvEncoderGL.h"
-#endif
+// #if SUPPORT_OPENGL_CORE && CUDA_PLATFORM
+// #include "NvCodec/NvEncoderGL.h"
+// #endif
 
-#if SUPPORT_D3D11
-#include "NvCodec/NvEncoderD3D11.h"
-#endif
+// #if SUPPORT_D3D11
+// #include "NvCodec/NvEncoderD3D11.h"
+// #endif
 
-#if SUPPORT_D3D12
-#include "NvCodec/NvEncoderD3D12.h"
-#endif
+// #if SUPPORT_D3D12
+// #include "NvCodec/NvEncoderD3D12.h"
+// #endif
 
 #include "SoftwareCodec/SoftwareEncoder.h"
 
@@ -64,23 +64,23 @@ namespace webrtc
         switch (deviceType) {
 #if SUPPORT_D3D11
             case GRAPHICS_DEVICE_D3D11: {
-                if (encoderType == UnityEncoderType::UnityEncoderHardware)
-                {
-                    encoder = std::make_unique<NvEncoderD3D11>(width, height, device, textureFormat);
-                } else {
-                    encoder = std::make_unique<SoftwareEncoder>(width, height, device, textureFormat);
-                }
+                // if (encoderType == UnityEncoderType::UnityEncoderHardware)
+                // {
+                //     encoder = std::make_unique<NvEncoderD3D11>(width, height, device, textureFormat);
+                // } else {
+                encoder = std::make_unique<SoftwareEncoder>(width, height, device, textureFormat);
+                // }
                 break;
             }
 #endif
 #if SUPPORT_D3D12
             case GRAPHICS_DEVICE_D3D12: {
-                if (encoderType == UnityEncoderType::UnityEncoderHardware)
-                {
-                    encoder = std::make_unique<NvEncoderD3D12>(width, height, device, textureFormat);
-                } else {
-                    encoder = std::make_unique<SoftwareEncoder>(width, height, device, textureFormat);
-                }
+                //  if (encoderType == UnityEncoderType::UnityEncoderHardware)
+                // {
+                //     encoder = std::make_unique<NvEncoderD3D12>(width, height, device, textureFormat);
+                // } else {
+                encoder = std::make_unique<SoftwareEncoder>(width, height, device, textureFormat);
+                // }
                 break;
             }
 #endif
